@@ -4,6 +4,7 @@ from app.schemas.user_schema import UserCreate
 from app.utils.hashing import hash_password, verify_password
 from app.utils.auth import create_access_token
 
+
 router = APIRouter()
 
 # ---------------- CREATE ----------------
@@ -66,3 +67,19 @@ def delete_user(username: str, supabase = Depends(get_supabase)):
     if res.data == []:
         raise HTTPException(status_code=404, detail="User not found")
     return {"message": "User deleted"}
+
+supabase = get_supabase()
+def get_user_by_username(username: str):
+    """
+    Fetch a single user by username.
+    Returns a dict (the user row) or None if not found.
+    """
+    res = (
+        supabase
+        .table("users")
+        .select("*")
+        .eq("username", username)
+        .execute()
+    )
+
+    return res.data[0] if res.data else None

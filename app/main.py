@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import users, skills, opportunities, mentorships
+from app.routes import users, skills, opportunities, mentorships,opportunity_skills,user_skills
 
 app = FastAPI(
     title="SkillSync Backend (Supabase)",
@@ -21,6 +21,10 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(skills.router, prefix="/skills", tags=["Skills"])
 app.include_router(opportunities.router, prefix="/opportunities", tags=["Opportunities"])
 app.include_router(mentorships.router, prefix="/mentorships", tags=["Mentorships"])
+app.include_router(opportunity_skills.router, prefix="/opportunity-skills", tags=["Opportunity Skills"])
+app.include_router(user_skills.router,prefix="/user-skills", tags=["User Skills"])
+
+
 
 # ---------------- HEALTH CHECK ----------------
 @app.get("/")

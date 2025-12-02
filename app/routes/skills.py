@@ -42,3 +42,31 @@ def delete_skill(name: str, supabase = Depends(get_supabase)):
     if not res.data:
         raise HTTPException(status_code=404, detail="Skill not found")
     return {"message": "Skill deleted"}
+
+supabase = get_supabase()
+
+def get_skill_by_name(name: str):
+    res = supabase.table("skills").select("*").eq("name", name).execute()
+    return res.data[0] if res.data else None
+
+
+def create_skill(name: str, category="auto", skill_description="auto-added"):
+    """
+    Insert a new skill if it doesn't exist.
+    """
+    res = supabase.table("skills").insert({
+        "name": name,
+        "category": category,
+        "skill_description": skill_description
+    }).execute()
+    return res.data[0]
+
+
+def get_or_create_skill(name: str):
+    """
+    Check if a skill exists; if not, create it.
+    """
+    skill = get_skill_by_name(name)
+    if skill:
+        return skill
+    return create_skill(name)

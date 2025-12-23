@@ -18,11 +18,13 @@
 
 <div class="container">
 
+  <!-- Profile -->
   <div class="card">
     <h2>My Profile</h2>
     <ul id="profileList"></ul>
   </div>
 
+  <!-- Skills -->
   <div class="card">
     <h2>My Skills</h2>
     <ul id="userSkillsList"></ul>
@@ -30,18 +32,25 @@
     <button id="addSkillBtn" class="btn primary-btn">Add Skill</button>
   </div>
 
+  <!-- Mentorship & Matching -->
   <div class="card">
     <h2>Mentorship</h2>
-    <button class="btn primary-btn" onclick="findMentor()">Find Mentor</button>
-    <button class="btn secondary-btn" onclick="findMentee()">Find Mentee</button>
+    <label for="matchRoleDropdown">Select role to match:</label>
+    <select id="matchRoleDropdown">
+      <option value="mentor">Mentor</option>
+      <option value="mentee">Mentee</option>
+    </select>
+    <button class="btn primary-btn" onclick="findMatches()">Find Matches</button>
     <ul id="matchResult"></ul>
   </div>
 
+  <!-- My Mentorships -->
   <div class="card">
     <h2>My Mentorships</h2>
     <ul id="mentorshipList"></ul>
   </div>
 
+  <!-- Chat -->
   <div class="card">
     <h2>Chat</h2>
     <select id="chatUser"></select>
@@ -50,6 +59,7 @@
     <button onclick="sendMessage()" class="btn primary-btn">Send</button>
   </div>
 
+  <!-- Opportunities -->
   <div class="card">
     <h2>Opportunities</h2>
     <ul id="opportunityList"></ul>

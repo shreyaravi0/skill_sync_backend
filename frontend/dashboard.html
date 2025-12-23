@@ -1,124 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SkillSync — Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    
+  <meta charset="UTF-8">
+  <title>SkillSync — Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<script src="dashboard.js"></script>
-<body class="bg-pattern">
+
+<body>
 
 <header class="topbar">
-    <h1>🐧 SkillSync Dashboard</h1>
-    <button id="logoutBtn" class="logout-btn">Logout</button>
+  <h1>SkillSync</h1>
+  <div class="top-right">
+    <span id="userDisplay"></span>
+    <button id="logoutBtn">Logout</button>
+  </div>
 </header>
 
-<section class="welcome-section">
-    <img src="https://i.imgur.com/Y6bZf0v.png" class="mascot-small">
-    <h2 class="welcome-title">Welcome, <span id="userDisplay"></span>!</h2>
-</section>
+<div class="container">
 
-<div class="dashboard-grid">
+  <div class="card">
+    <h2>My Profile</h2>
+    <ul id="profileList"></ul>
+  </div>
 
-    <!-- Learn Request -->
-    <div class="dash-card">
-        <h3 class="card-title">🎯 What do you want to learn?</h3>
-        <p class="card-desc">Describe your learning goal & pick a skill to focus on.</p>
+  <div class="card">
+    <h2>My Skills</h2>
+    <ul id="userSkillsList"></ul>
+    <select id="skillDropdown"></select>
+    <button id="addSkillBtn" class="btn primary-btn">Add Skill</button>
+  </div>
 
-        <input id="learningGoal" type="text" class="input-field" placeholder="Ex: I want to learn Web Development">
+  <div class="card">
+    <h2>Mentorship</h2>
+    <button class="btn primary-btn" onclick="findMentor()">Find Mentor</button>
+    <button class="btn secondary-btn" onclick="findMentee()">Find Mentee</button>
+    <ul id="matchResult"></ul>
+  </div>
 
-        <select id="skillDropdown" class="input-field dropdown"></select>
+  <div class="card">
+    <h2>My Mentorships</h2>
+    <ul id="mentorshipList"></ul>
+  </div>
 
-        <button id="btnSubmitInterest" class="btn primary-btn">Submit Interest</button>
-    </div>
+  <div class="card">
+    <h2>Chat</h2>
+    <select id="chatUser"></select>
+    <div id="chatBox" class="chat-box"></div>
+    <input id="chatInput" class="input-field" placeholder="Type message">
+    <button onclick="sendMessage()" class="btn primary-btn">Send</button>
+  </div>
 
-    <!-- Skills -->
-    <div class="dash-card">
-        <h3 class="card-title">🧠 Your Skills</h3>
-        <ul id="userSkillsList" class="list"></ul>
-    </div>
-
-    <!-- Mentors -->
-    <div class="dash-card">
-        <h3 class="card-title">👨‍🏫 Suggested Mentors</h3>
-        <ul id="mentorList" class="list"></ul>
-    </div>
+  <div class="card">
+    <h2>Opportunities</h2>
+    <ul id="opportunityList"></ul>
+  </div>
 
 </div>
 
-<!-- RESUME UPLOAD -->
-<div class="dash-card" style="margin:30px;">
-    <h3 class="card-title">📄 Upload Resume</h3>
-    <input type="file" id="resumeFile">
-    <button class="btn primary-btn" onclick="uploadResume()">Upload Resume</button>
-</div>
-
-<script>
-// ------------------- AUTH -------------------
-const username = localStorage.getItem("username");
-if (!username) window.location.href = "index.html";
-
-document.getElementById("userDisplay").innerText = username;
-
-// ------------------- LOAD SKILLS -------------------
-async function loadUserSkills() {
-    const res = await fetch("http://127.0.0.1:8000/skills/");
-    const skills = await res.json();
-
-    const list = document.getElementById("userSkillsList");
-    const dropdown = document.getElementById("skillDropdown");
-
-    list.innerHTML = "";
-    dropdown.innerHTML = "";
-
-    skills.forEach(s => {
-        // add to dropdown
-        const opt = document.createElement("option");
-        opt.value = s.name;
-        opt.innerText = s.name;
-        dropdown.appendChild(opt);
-
-        // placeholder user skill list — (backend join needed)
-        const li = document.createElement("li");
-        li.classList.add("list-item");
-        li.innerText = s.name;
-        list.appendChild(li);
-    });
-}
-loadUserSkills();
-
-// ------------------- SUBMIT INTEREST -------------------
-document.getElementById("btnSubmitInterest").addEventListener("click", async () => {
-    const selectedSkill = document.getElementById("skillDropdown").value;
-
-    await fetch("http://127.0.0.1:8000/user-skills/", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            username: username,
-            skill_names: [selectedSkill]
-        })
-    });
-
-    alert("Skill interest added!");
-    loadUserSkills();
-});
-
-// ------------------- MENTOR SUGGESTION (STATIC FOR NOW) -------------------
-document.getElementById("mentorList").innerHTML = `
-    <li class="list-item">Aarti Sharma — Cloud</li>
-    <li class="list-item">Rahul Jain — Web Dev</li>
-    <li class="list-item">Sneha Rao — Machine Learning</li>
-`;
-
-
-// ------------------- LOGOUT -------------------
-document.getElementById("logoutBtn").onclick = () => {
-    localStorage.clear();
-    window.location.href = "index.html";
-};
-</script>
-
+<script src="dashboard.js"></script>
 </body>
 </html>

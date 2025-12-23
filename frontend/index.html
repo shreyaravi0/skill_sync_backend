@@ -1,66 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>SkillSync — Login</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>SkillSync — Login / Register</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="bg-pattern">
+<body class="auth-body">
 
-<header class="topbar">
-    <h1>🐧 SkillSync</h1>
-    <p class="tagline">Find the right mentor, build the right skills.</p>
-</header>
+<div class="auth-container">
+  <h1 class="brand-title">SkillSync</h1>
+  <p class="subtitle">Find the right mentor. Build the right skills.</p>
 
-<div class="container">
-    <div class="auth-card">
+  <div class="auth-card">
 
-        <img src="https://i.imgur.com/Y6bZf0v.png" class="mascot">
-
-        <h2>Welcome Back!</h2>
-        <p class="subtitle">Login to continue</p>
-
-        <form id="loginForm">
-            <input id="username" type="text" placeholder="Username" class="input-field">
-            <input id="password" type="password" placeholder="Password" class="input-field">
-
-            <button type="submit" class="btn primary-btn">Login</button>
-        </form>
-
-        <p class="switch-text">
-            New here? <a href="#" class="link">Create an account</a>
-        </p>
+    <!-- LOGIN FORM -->
+    <div id="login-section">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <input id="login-username" type="text" class="input-field" placeholder="Username" required>
+        <input id="login-password" type="password" class="input-field" placeholder="Password" required>
+        <button type="submit" class="btn primary-btn">Login</button>
+      </form>
+      <p class="switch-text">
+        New here? <button id="showRegisterBtn" class="link-btn">Register</button>
+      </p>
     </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-section" style="display:none;">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <input id="reg-username" type="text" class="input-field" placeholder="Username" required>
+        <input id="reg-name" type="text" class="input-field" placeholder="Full Name" required>
+        <input id="reg-password" type="password" class="input-field" placeholder="Password" required>
+        <select id="reg-role" class="input-field">
+          <option value="mentee">Mentee</option>
+          <option value="mentor">Mentor</option>
+        </select>
+        <input id="reg-phone" type="text" class="input-field" placeholder="Phone Number">
+        <input id="reg-experience" type="text" class="input-field" placeholder="Experience Level">
+        <textarea id="reg-summary" class="input-field" placeholder="Profile Summary"></textarea>
+        <button type="submit" class="btn primary-btn">Register</button>
+      </form>
+      <p class="switch-text">
+        Already have an account? <button id="showLoginBtn" class="link-btn">Login</button>
+      </p>
+    </div>
+
+  </div>
 </div>
 
 <script>
-// ------------------- LOGIN LOGIC -------------------
+const API = "http://127.0.0.1:8000";
+
+// --- TOGGLE LOGIN / REGISTER ---
+const loginSection = document.getElementById("login-section");
+const registerSection = document.getElementById("register-section");
+document.getElementById("showRegisterBtn").onclick = () => {
+  loginSection.style.display = "none";
+  registerSection.style.display = "block";
+};
+document.getElementById("showLoginBtn").onclick = () => {
+  registerSection.style.display = "none";
+  loginSection.style.display = "block";
+};
+
+// --- LOGIN LOGIC ---
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+  e.preventDefault();
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
 
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
+  const res = await fetch(`${API}/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
 
-    const res = await fetch("http://127.0.0.1:8000/users/login", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ username, password })
-    });
+  const data = await res.json();
 
-    const data = await res.json();
+  if (!res.ok) {
+    alert(data.detail || "Login failed");
+    return;
+  }
 
-    if (!res.ok) {
-        alert(data.detail || "Login failed");
-        return;
-    }
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("username", data.username);
+  localStorage.setItem("role", data.role);
+  window.location.href = "dashboard.html";
+});
 
-    // Save details
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("username", data.username);
-    localStorage.setItem("role", data.role);
+// --- REGISTER LOGIC ---
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    window.location.href = "dashboard.html";
+  const payload = {
+    username: document.getElementById("reg-username").value.trim(),
+    name: document.getElementById("reg-name").value.trim(),
+    password: document.getElementById("reg-password").value.trim(),
+    role: document.getElementById("reg-role").value,
+    phone_number: document.getElementById("reg-phone").value.trim(),
+    experience_level: document.getElementById("reg-experience").value.trim(),
+    profile_summary: document.getElementById("reg-summary").value.trim()
+  };
+
+  const res = await fetch(`${API}/users/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.detail || "Registration failed");
+    return;
+  }
+
+  alert("Registration successful! Logging in...");
+  // AUTO LOGIN AFTER REGISTER
+  const loginRes = await fetch(`${API}/users/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: payload.username, password: payload.password })
+  });
+
+  const loginData = await loginRes.json();
+  if (!loginRes.ok) return alert(loginData.detail || "Login after registration failed");
+
+  localStorage.setItem("token", loginData.token);
+  localStorage.setItem("username", loginData.username);
+  localStorage.setItem("role", loginData.role);
+  window.location.href = "dashboard.html";
 });
 </script>
 

@@ -41,3 +41,5 @@ def assign_skills(data: OpportunitySkillAssign, supabase = Depends(get_supabase)
         "message": "Skills assigned to opportunity",
         "assigned": inserted_rows
     }
+
+

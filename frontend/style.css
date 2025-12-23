@@ -1,169 +1,125 @@
-/* ========================
-   GLOBAL + BACKGROUND
-========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
 
 body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    color: #333;
+  background: #f4f6f9;
+  color: #333;
 }
 
-/* Light geometric background pattern */
 .bg-pattern {
-    background: linear-gradient(135deg, #eef7ff, #ffffff);
-    background-image:
-        radial-gradient(circle at 10% 20%, rgba(134, 182, 255, 0.25) 0, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(255, 180, 180, 0.25) 0, transparent 40%),
-        radial-gradient(circle at 50% 0%, rgba(255, 237, 134, 0.25) 0, transparent 40%);
-    background-repeat: no-repeat;
+  min-height: 100vh;
 }
 
-/* ========================
-   TOP BAR
-========================= */
 .topbar {
-    background: linear-gradient(to right, #4f46e5, #06b6d4);
-    padding: 25px;
-    text-align: center;
-    color: white;
-    position: relative;
+  background: #2563eb;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.logout-btn {
-    position: absolute;
-    top: 25px;
-    right: 30px;
-    padding: 8px 16px;
-    border: none;
-    background: #ef4444;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
+.tagline {
+  font-size: 0.9rem;
+  opacity: 0.9;
 }
-
-/* ========================
-   AUTH CARD
-========================= */
 
 .container {
-    display: flex;
-    justify-content: center;
-    margin-top: 60px;
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
 }
 
 .auth-card {
-    width: 400px;
-    background: white;
-    padding: 40px;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-    text-align: center;
+  background: white;
+  padding: 30px;
+  max-width: 360px;
+  margin: auto;
+  margin-top: 60px;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
 .mascot {
-    width: 120px;
-    margin-bottom: 15px;
+  width: 90px;
+  margin-bottom: 15px;
 }
 
-.role-selector {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.role-btn {
-    padding: 10px 20px;
-    border-radius: 8px;
-    border: none;
-    background: #e0e7ff;
-    cursor: pointer;
-    font-size: 14px;
+h2 {
+  color: #2563eb;
+  margin-bottom: 12px;
 }
 
-.role-btn:hover {
-    background: #c7d2fe;
+ul {
+  list-style: none;
+  margin-bottom: 12px;
 }
 
-/* Inputs */
+ul li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
 .input-field {
-    width: 100%;
-    padding: 14px;
-    margin: 10px 0;
-    border-radius: 8px;
-    border: 1px solid #d4d4d4;
-    font-size: 15px;
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
-/* Buttons */
 .btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .primary-btn {
-    background: #6366f1;
-    color: white;
+  background: #2563eb;
+  color: white;
 }
 
-.primary-btn:hover {
-    background: #4f46e5;
+.secondary-btn {
+  background: #e5e7eb;
 }
 
-/* ========================
-   DASHBOARD
-========================= */
-
-.mascot-small {
-    width: 90px;
-    display: block;
-    margin: 0 auto 15px auto;
+#logoutBtn {
+  background: white;
+  color: #2563eb;
+  padding: 6px 12px;
+  border-radius: 6px;
 }
 
-.welcome-section {
-    text-align: center;
-    margin-top: 40px;
+.chat-box {
+  height: 150px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background: #fafafa;
+  overflow-y: auto;
 }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    padding: 30px;
-    gap: 25px;
+.muted {
+  color: #777;
+  font-size: 0.85rem;
 }
 
-.dash-card {
-    background: white;
-    padding: 25px;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-}
-
-.card-title {
-    font-size: 22px;
-}
-
-.list {
-    list-style: none;
-    padding: 0;
-}
-
-.list-item {
-    background: #f1f5f9;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-}
-
-/* Dropdown */
-.dropdown {
-    appearance: none;
-    background-image: url("https://cdn-icons-png.flaticon.com/512/2985/2985150.png");
-    background-size: 18px;
-    background-repeat: no-repeat;
-    background-position: 95% center;
+@media (max-width: 600px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 }

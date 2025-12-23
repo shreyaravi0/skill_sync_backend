@@ -1,7 +1,7 @@
 # app/ml/matcher.py
 
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+#from sklearn.metrics.pairwise import cosine_similarity
 
 def build_skill_vector(user_skills, all_skills):
     vec = np.zeros(len(all_skills))

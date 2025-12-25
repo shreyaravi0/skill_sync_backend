@@ -1,94 +1,133 @@
-// ================================
-// Get users from localStorage
-// ================================
-const currentUser = localStorage.getItem("username");
-const chatWith = localStorage.getItem("chatWith");
+console.log("chat.js loaded");
+// ---------------- CONFIG ----------------
+const SUPABASE_URL = "https://ygaprmfmbtkbgehpmcde.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlnYXBybWZtYnRrYmdlaHBtY2RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NTQ0NzAsImV4cCI6MjA3ODQzMDQ3MH0.gg8RPKj-xee91qgEx1fFlw2LdvDgRd7gxbpMvvLeuSI"; // 👈 put full key here
 
-if (!currentUser || !chatWith) {
-    alert("Chat session not initialized");
+// Import Supabase client
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ---------------- DOM ----------------
+const chatBox = document.getElementById("chatBox");
+const chatInput = document.getElementById("chatInput");
+const sendBtn = document.getElementById("sendBtn");
+const userDisplay = document.getElementById("userDisplay");
+const backBtn = document.getElementById("backBtn");
+
+// ---------------- SESSION ----------------
+const username = localStorage.getItem("username");
+
+// Get chatWith from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const chatWith = urlParams.get("user");
+
+if (!username || !chatWith) {
+    alert("Session expired or chat user missing");
     window.location.href = "dashboard.html";
 }
 
-document.getElementById("chatWith").innerText = `Chat with ${chatWith}`;
+userDisplay.innerText = `Chatting with: ${chatWith}`;
 
-// Shared chat ID
-const chatId = [currentUser, chatWith].sort().join("_");
-
-
-
-// ================================
-// Firebase Initialization
-// ================================
-const firebaseConfig = {
-  apiKey: "AIzaSyAIwkJhiaTzZCrmlHWIlefC8heKo6qd-mg",
-  authDomain: "dbmsel-34b4d.firebaseapp.com",
-  projectId: "dbmsel-34b4d",
-  storageBucket: "dbmsel-34b4d.firebasestorage.app",
-  messagingSenderId: "497021855060",
-  appId: "1:497021855060:web:1006d3c35bb7bf4b1394c1",
-  measurementId: "G-9Y85BEWT5E"
+// Back button
+backBtn.onclick = () => {
+    window.location.href = "dashboard.html";
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// ---------------- SEND MESSAGE ----------------
+sendBtn.addEventListener("click", sendMessage);
+chatInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
 
-// ================================
-// Real-time Listener
-// ================================
-db.collection("chats")
-  .doc(chatId)
-  .collection("messages")
-  .orderBy("timestamp")
-  .onSnapshot(snapshot => {
-      const chatBox = document.getElementById("chatBox");
-      chatBox.innerHTML = "";
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
 
-      snapshot.forEach(doc => {
-          const msg = doc.data();
-          const isMe = msg.sender === currentUser;
+    try {
+        const { data, error } = await supabaseClient
+            .from("messages")
+            .insert([{ 
+                from_user: username, 
+                to_user: chatWith, 
+                message 
+            }]);
 
-          const div = document.createElement("div");
-          div.className = isMe ? "message sent" : "message received";
+        if (error) {
+            console.error("Insert failed:", error);
+            alert("Failed to send message");
+            return;
+        }
 
-          div.innerHTML = `
-              ${msg.text}
-              <div class="timestamp">
-                ${msg.timestamp
-                    ? msg.timestamp.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                    : ""}
-              </div>
-          `;
-
-          chatBox.appendChild(div);
-      });
-
-      chatBox.scrollTop = chatBox.scrollHeight;
-  });
-
-
-// ================================
-// Send Message
-// ================================
-function sendMessage() {
-    const input = document.getElementById("messageInput");
-    const text = input.value.trim();
-    if (!text) return;
-
-    db.collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .add({
-          sender: currentUser,
-          text: text,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-    input.value = "";
+        chatInput.value = "";
+    } catch (err) {
+        console.error("Error sending message:", err);
+    }
 }
 
+// ---------------- LOAD MESSAGES ----------------
+async function loadMessages() {
+    try {
+        const { data, error } = await supabaseClient
+            .from("messages")
+            .select("*")
+            .or(`and(from_user.eq.${username},to_user.eq.${chatWith}),and(from_user.eq.${chatWith},to_user.eq.${username})`)
+            .order("created_at", { ascending: true });
 
-// Enter key support
-document.getElementById("messageInput")
-  .addEventListener("keypress", e => {
-      if (e.key === "Enter") sendMessage();
-  });
+        if (error) {
+            console.error("Load messages error:", error);
+            return;
+        }
+
+        chatBox.innerHTML = "";
+        data.forEach(m => {
+            const isMe = m.from_user === username;
+            const text = isMe ? `You: ${m.message}` : `${chatWith}: ${m.message}`;
+            appendMessage(text, isMe);
+        });
+    } catch (err) {
+        console.error("Error loading messages:", err);
+    }
+}
+
+// ---------------- APPEND MESSAGE ----------------
+function appendMessage(text, isMe = false) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    div.style.marginBottom = "8px";
+    div.style.padding = "8px";
+    div.style.borderRadius = "5px";
+    div.style.backgroundColor = isMe ? "#e3f2fd" : "#f5f5f5";
+    div.style.textAlign = isMe ? "right" : "left";
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+// ---------------- REAL-TIME ----------------
+const channel = supabaseClient
+    .channel("messages-channel")
+    .on(
+        "postgres_changes",
+        { 
+            event: "INSERT", 
+            schema: "public", 
+            table: "messages" 
+        },
+        (payload) => {
+            const m = payload.new;
+            
+            // Only show messages between current user and chat partner
+            if ((m.from_user === username && m.to_user === chatWith) || 
+                (m.from_user === chatWith && m.to_user === username)) {
+                const isMe = m.from_user === username;
+                const text = isMe ? `You: ${m.message}` : `${chatWith}: ${m.message}`;
+                appendMessage(text, isMe);
+            }
+        }
+    )
+    .subscribe((status) => {
+        console.log("Subscription status:", status);
+    });
+
+// Initial load
+loadMessages();

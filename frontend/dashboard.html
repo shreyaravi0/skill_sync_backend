@@ -32,31 +32,24 @@
     <button id="addSkillBtn" class="btn primary-btn">Add Skill</button>
   </div>
 
-  <!-- Mentorship & Matching -->
+  <!-- Matching -->
   <div class="card">
-    <h2>Mentorship</h2>
-    <label for="matchRoleDropdown">Select role to match:</label>
+    <h2>Mentorship Matching</h2>
+
+    <label>Select role:</label>
     <select id="matchRoleDropdown">
       <option value="mentor">Mentor</option>
       <option value="mentee">Mentee</option>
     </select>
+
     <button class="btn primary-btn" onclick="findMatches()">Find Matches</button>
     <ul id="matchResult"></ul>
   </div>
 
-  <!-- My Mentorships -->
+  <!-- Mentorships -->
   <div class="card">
     <h2>My Mentorships</h2>
     <ul id="mentorshipList"></ul>
-  </div>
-
-  <!-- Chat -->
-  <div class="card">
-    <h2>Chat</h2>
-    <select id="chatUser"></select>
-    <div id="chatBox" class="chat-box"></div>
-    <input id="chatInput" class="input-field" placeholder="Type message">
-    <button onclick="sendMessage()" class="btn primary-btn">Send</button>
   </div>
 
   <!-- Opportunities -->

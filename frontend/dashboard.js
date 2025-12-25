@@ -6,16 +6,15 @@ const ENDPOINTS = {
   USER_SKILLS: `${API}/user-skills/user-skills`,
   MENTORSHIPS: `${API}/mentorships/mentorships`,
   OPPORTUNITIES: `${API}/opportunities`,
-  MATCH: `${API}/match/match/all`
+  MATCH: `${API}/match/match/all`   
 };
 
 // ---------- SESSION CHECK ----------
 const token = localStorage.getItem("token");
 const username = localStorage.getItem("username");
 
-if (!token || !username || username === "null") {
-  alert("Session expired. Please login again.");
-  localStorage.clear();
+if (!token || !username) {
+  alert("Session expired");
   window.location.href = "index.html";
 }
 
@@ -27,20 +26,18 @@ const AUTH_HEADERS = {
 };
 
 // ---------- LOGOUT ----------
-logoutBtn.onclick = () => {
+document.getElementById("logoutBtn").onclick = () => {
   localStorage.clear();
   window.location.href = "index.html";
 };
 
 // ---------- PROFILE ----------
 async function loadProfile() {
-  const res = await fetch(`${ENDPOINTS.USERS}/${username}`, {
-    headers: AUTH_HEADERS
-  });
+  const res = await fetch(`${ENDPOINTS.USERS}/${username}`, { headers: AUTH_HEADERS });
   const user = await res.json();
 
   profileList.innerHTML = "";
-  ["name","role","experience_level","profile_summary"].forEach(f => {
+  ["name", "role", "experience_level", "profile_summary"].forEach(f => {
     const li = document.createElement("li");
     li.textContent = `${f}: ${user[f] || "N/A"}`;
     profileList.appendChild(li);
@@ -77,13 +74,12 @@ async function loadUserSkills() {
 }
 
 addSkillBtn.onclick = async () => {
-  const skill = skillDropdown.value;
   await fetch(ENDPOINTS.USER_SKILLS, {
     method: "POST",
     headers: AUTH_HEADERS,
     body: JSON.stringify({
-      username: username,
-      skill_names: [skill]
+      username,
+      skill_names: [skillDropdown.value]
     })
   });
   loadUserSkills();
@@ -94,124 +90,77 @@ loadUserSkills();
 
 // ---------- MATCH ----------
 async function findMatches() {
-  const role = matchRoleDropdown.value; // mentor or mentee
+  const role = matchRoleDropdown.value;
 
-  try {
-    const res = await fetch(ENDPOINTS.MATCH, {
-      method: "POST",
-      headers: AUTH_HEADERS,
-      body: JSON.stringify({ username }) // send current username
-    });
-
-    if (!res.ok) {
-      matchResult.innerHTML = `<li>Error fetching matches: ${res.status}</li>`;
-      return;
-    }
-
-    const data = await res.json();
-    matchResult.innerHTML = "";
-
-    if (data.matches && data.matches.length > 0) {
-      const filteredMatches = data.matches.filter(m => m.role === role);
-
-      if (filteredMatches.length === 0) {
-        matchResult.innerHTML = "<li>No matches found for this role</li>";
-        return;
-      }
-
-      filteredMatches.forEach(match => {
-        const li = document.createElement("li");
-        li.innerHTML = `
-          ${match.username} (${match.role}) — Score: ${match.score.toFixed(2)}
-          <button onclick="startChat('${match.username}')">Chat</button>
-          <button onclick="addMentorship('${match.username}', '${match.role}')">Add to Mentorship</button>
-        `;
-        matchResult.appendChild(li);
-      });
-    } else {
-      matchResult.innerHTML = "<li>No matches found</li>";
-    }
-  } catch (err) {
-    console.error(err);
-    matchResult.innerHTML = "<li>Error fetching matches</li>";
-  }
-}
-
-// ---------- ADD TO MENTORSHIP ----------
-async function addMentorship(otherUsername, otherRole) {
-  const mentor = otherRole === "mentee" ? username : otherUsername;
-  const mentee = otherRole === "mentee" ? otherUsername : username;
-
-  try {
-    const res = await fetch(`${ENDPOINTS.MENTORSHIPS}`, {
-      method: "POST",
-      headers: AUTH_HEADERS,
-      body: JSON.stringify({
-        mentor_name: mentor,
-        mentee_name: mentee
-      })
-    });
-
-    if (!res.ok) {
-      alert(`Error creating mentorship: ${res.status}`);
-      return;
-    }
-
-    alert(`Mentorship added: ${mentor} → ${mentee}`);
-    loadMentorships(); // refresh mentorship list
-  } catch (err) {
-    console.error(err);
-    alert("Error adding mentorship");
-  }
-}
-
-// ---------- MENTORSHIPS ----------
-async function loadMentorships() {
-  const res = await fetch(ENDPOINTS.MENTORSHIPS, {
-    headers: AUTH_HEADERS
+  const res = await fetch(ENDPOINTS.MATCH, {
+    method: "POST",
+    headers: AUTH_HEADERS,
+    body: JSON.stringify({ username })
   });
+
+  const data = await res.json();
+  matchResult.innerHTML = "";
+
+  if (!data.matches || data.matches.length === 0) {
+    matchResult.innerHTML = "<li>No matches found</li>";
+    return;
+  }
+
+  data.matches
+    .filter(m => m.role === role)
+    .forEach(m => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        ${m.username} (${m.role}) — ${m.score.toFixed(2)}
+        <button onclick="openChat('${m.username}')">Chat</button>
+        <button onclick="addMentorship('${m.username}','${m.role}')">Add</button>
+      `;
+      matchResult.appendChild(li);
+    });
+}
+
+// ---------- MENTORSHIP ----------
+async function addMentorship(other, role) {
+  const mentor = role === "mentee" ? username : other;
+  const mentee = role === "mentee" ? other : username;
+
+  await fetch(ENDPOINTS.MENTORSHIPS, {
+    method: "POST",
+    headers: AUTH_HEADERS,
+    body: JSON.stringify({ mentor_name: mentor, mentee_name: mentee })
+  });
+
+  loadMentorships();
+}
+
+async function loadMentorships() {
+  const res = await fetch(ENDPOINTS.MENTORSHIPS, { headers: AUTH_HEADERS });
   const data = await res.json();
 
   mentorshipList.innerHTML = "";
   data.forEach(m => {
     if (m.mentor_name === username || m.mentee_name === username) {
       const li = document.createElement("li");
-      li.textContent = `${m.mentor_name} → ${m.mentee_name}`;
+      li.innerHTML = `
+        ${m.mentor_name} → ${m.mentee_name}
+        <button onclick="openChat('${m.mentor_name === username ? m.mentee_name : m.mentor_name}')">
+          Chat
+        </button>
+      `;
       mentorshipList.appendChild(li);
     }
   });
 }
 loadMentorships();
 
-// ---------- CHAT ----------
-function addChatUser(user) {
-  if ([...chatUser.options].some(o => o.value === user)) return;
-  const opt = document.createElement("option");
-  opt.value = user;
-  opt.textContent = user;
-  chatUser.appendChild(opt);
-}
-
-function startChat(toUser) {
-  addChatUser(toUser);
-}
-
-function sendMessage() {
-  const msg = chatInput.value;
-  const to = chatUser.value;
-  if (!msg || !to) return;
-
-  const div = document.createElement("div");
-  div.textContent = `You → ${to}: ${msg}`;
-  chatBox.appendChild(div);
-  chatInput.value = "";
+// ---------- CHAT (REDIRECT ONLY – SAFE) ----------
+function openChat(user) {
+   window.location.href = `chat.html?user=${user}`;
 }
 
 // ---------- OPPORTUNITIES ----------
 async function loadOpportunities() {
-  const res = await fetch(ENDPOINTS.OPPORTUNITIES, {
-    headers: AUTH_HEADERS
-  });
+  const res = await fetch(ENDPOINTS.OPPORTUNITIES, { headers: AUTH_HEADERS });
   const opps = await res.json();
 
   opportunityList.innerHTML = "";
@@ -222,3 +171,4 @@ async function loadOpportunities() {
   });
 }
 loadOpportunities();
+ 

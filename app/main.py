@@ -21,7 +21,7 @@ app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(skills.router, prefix="/skills", tags=["Skills"])
 app.include_router(opportunities.router, prefix="/opportunities", tags=["Opportunities"])
 app.include_router(mentorships.router)
-app.include_router(opportunity_skills.router,prefix="/opportunity-skills",tags=["Opportunity Skills"])
+app.include_router(opportunity_skills.router, prefix="/opportunity-skills", tags=["Opportunity Skills"])
 app.include_router(user_skills.router)
 app.include_router(match.router, prefix="/match", tags=["Matching"])
 # ---------------- HEALTH CHECK ----------------

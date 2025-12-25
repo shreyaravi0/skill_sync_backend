@@ -6,7 +6,7 @@ const ENDPOINTS = {
     USER_SKILLS: `${API}/user-skills`,
     MENTORSHIPS: `${API}/mentorships`,
     OPPORTUNITIES: `${API}/opportunities`,
-    OPPORTUNITY_SKILLS: `${API}/opportunity-skills/`,
+    OPPORTUNITY_SKILLS: `${API}/opportunity-skills/opportunity-skills`,
     MATCH: `${API}/match/match`
 };
 
@@ -304,7 +304,6 @@ document.getElementById("createOppBtn").onclick = () => {
 document.getElementById("cancelOppBtn").onclick = () => {
     document.getElementById("createOppForm").style.display = "none";
 };
-
 // CREATE OPPORTUNITY
 document.getElementById("saveOppBtn").onclick = async () => {
     const title = document.getElementById("oppTitle").value.trim();
@@ -321,15 +320,15 @@ document.getElementById("saveOppBtn").onclick = async () => {
     }
 
     try {
-        // 1️⃣ Create opportunity
-        const res = await fetch(`${ENDPOINTS.OPPORTUNITIES}/`, {
+        // 1️⃣ Create opportunity (remove trailing slash)
+        const res = await fetch(`${ENDPOINTS.OPPORTUNITIES}`, {
             method: "POST",
             headers: AUTH_HEADERS,
             body: JSON.stringify({
                 title,
                 description: description || "No description provided",
                 posted_by: username,
-                type
+                type // must be job | internship | mentorship
             })
         });
 
@@ -341,16 +340,21 @@ document.getElementById("saveOppBtn").onclick = async () => {
         const newOpp = await res.json();
         const oppId = newOpp.opp_id;
 
-        // 2️⃣ Assign skills (if any)
-        if (selectedSkills.length > 0) {
-            await fetch(`${ENDPOINTS.OPPORTUNITY_SKILLS}/`, {
-                method: "POST",
-                headers: AUTH_HEADERS,
-                body: JSON.stringify({
-                    opportunity_id: oppId,
-                    skill_names: selectedSkills
-                })
-            });
+        // 2️⃣ Assign skills (remove trailing slash)
+        if (selectedSkills.length > 0 && oppId) {
+            const skillRes =await fetch(`${ENDPOINTS.OPPORTUNITY_SKILLS}`, {
+    method: "POST",
+    headers: AUTH_HEADERS,
+    body: JSON.stringify({
+        opportunity_id: oppId,
+        skill_names: selectedSkills
+    })
+});
+
+            if (!skillRes.ok) {
+                const err = await skillRes.json();
+                throw new Error(err.detail || "Failed to assign skills");
+            }
         }
 
         showNotification("Opportunity created successfully!", "success");

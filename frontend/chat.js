@@ -18,9 +18,8 @@ const backBtn = document.getElementById("backBtn");
 // ---------------- SESSION ----------------
 const username = localStorage.getItem("username");
 
-// Get chatWith from URL parameter
 const urlParams = new URLSearchParams(window.location.search);
-const chatWith = urlParams.get("user");
+const chatWith = urlParams.get("chatWith");
 
 if (!username || !chatWith) {
     alert("Session expired or chat user missing");

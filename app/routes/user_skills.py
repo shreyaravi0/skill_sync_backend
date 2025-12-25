@@ -4,67 +4,47 @@ from app.schemas.user_skill_schema import UserSkillAssign
 from app.routes.skills import get_skill_by_name
 from app.routes.users import get_user_by_username
 
-router = APIRouter(prefix="/user-skills", tags=["User Skills"])
-
-# @router.post("/")
-# def assign_user_skills(data: UserSkillAssign, supabase = Depends(get_supabase)):
-
-#     user_id = data.user_id
-#     skill_names = data.skill_names
-
-#     inserted_rows = []
-
-#     for skill_name in skill_names:
-#         # 1. Fetch skill row
-#         skill = get_skill_by_name(skill_name)
-#         if not skill:
-#             raise HTTPException(
-#                 400,
-#                 detail=f"Skill '{skill_name}' does not exist in skills table"
-#             )
-
-#         skill_id = skill["skill_id"]
-
-#         # 2. Insert mapping into user_skills table
-#         res = (
-#             supabase
-#             .table("user_skills")
-#             .insert({
-#                 "user_id": user_id,
-#                 "skill_id": skill_id
-#             })
-#             .execute()
-#         )
-
-#         inserted_rows.append(res.data[0])
-
-#     return {
-#         "message": "Skills assigned to user",
-#         "assigned": inserted_rows
-#     }
+router = APIRouter(
+    prefix="/user-skills",
+    tags=["User Skills"]
+)
 
 
 @router.post("/")
 def assign_user_skills(data: UserSkillAssign, supabase = Depends(get_supabase)):
-
+    """
+    Assign skills to a user by username
+    """
     # 1. Fetch user by username
     user = get_user_by_username(data.username)
     if not user:
         raise HTTPException(400, f"User '{data.username}' does not exist")
 
-    user_id = user["user_id"]   # <-- IMPORTANT
+    user_id = user["user_id"]
 
     inserted_rows = []
 
     # 2. Loop through skill names
     for skill_name in data.skill_names:
-
         # fetch skill row
         skill = get_skill_by_name(skill_name)
         if not skill:
             raise HTTPException(400, f"Skill '{skill_name}' does not exist")
 
         skill_id = skill["skill_id"]
+
+        # Check if mapping already exists
+        existing = (
+            supabase
+            .table("user_skills")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("skill_id", skill_id)
+            .execute()
+        )
+        
+        if existing.data:
+            continue  # Skip if already exists
 
         # 3. Insert mapping into user_skills
         res = (
@@ -85,75 +65,79 @@ def assign_user_skills(data: UserSkillAssign, supabase = Depends(get_supabase)):
     }
 
 
-# -------------------------------------------------
-# GET USER SKILLS
-# GET /user-skills/{username}
-# -------------------------------------------------
 @router.get("/{username}")
-def get_user_skills(
-    username: str,
-    supabase = Depends(get_supabase)
-):
+def get_user_skills(username: str, supabase = Depends(get_supabase)):
+    """
+    Get all skills for a specific user by username
+    """
+    # 1. Get user
     user = get_user_by_username(username)
     if not user:
-        raise HTTPException(404, "User not found")
-
+        raise HTTPException(404, f"User '{username}' does not exist")
+    
     user_id = user["user_id"]
-
-    user_skills = (
+    
+    # 2. Get user_skills mappings
+    user_skill_rows = (
         supabase
         .table("user_skills")
         .select("skill_id")
         .eq("user_id", user_id)
         .execute()
+        .data
     )
-
-    if not user_skills.data:
+    
+    if not user_skill_rows:
         return []
+    
+    # 3. Get skill details for each skill_id
+    skills = []
+    for row in user_skill_rows:
+        skill_id = row["skill_id"]
+        skill_data = (
+            supabase
+            .table("skills")
+            .select("*")
+            .eq("skill_id", skill_id)
+            .execute()
+            .data
+        )
+        if skill_data:
+            skills.append(skill_data[0])
+    
+    return skills
 
-    skill_ids = [row["skill_id"] for row in user_skills.data]
 
-    skills = (
-        supabase
-        .table("skills")
-        .select("skill_id, name")
-        .in_("skill_id", skill_ids)
-        .execute()
-    )
-
-    return skills.data
-
-
-# -------------------------------------------------
-# DELETE USER SKILL
-# DELETE /user-skills/{username}/{skill_name}
-# -------------------------------------------------
 @router.delete("/{username}/{skill_name}")
-def delete_user_skill(
-    username: str,
-    skill_name: str,
-    supabase = Depends(get_supabase)
-):
+def remove_user_skill(username: str, skill_name: str, supabase = Depends(get_supabase)):
+    """
+    Remove a specific skill from a user
+    """
+    # 1. Get user
     user = get_user_by_username(username)
     if not user:
-        raise HTTPException(404, "User not found")
-
+        raise HTTPException(404, f"User '{username}' does not exist")
+    
+    user_id = user["user_id"]
+    
+    # 2. Get skill
     skill = get_skill_by_name(skill_name)
     if not skill:
-        raise HTTPException(404, "Skill not found")
-
-    delete_res = (
+        raise HTTPException(404, f"Skill '{skill_name}' does not exist")
+    
+    skill_id = skill["skill_id"]
+    
+    # 3. Delete mapping
+    res = (
         supabase
         .table("user_skills")
         .delete()
-        .eq("user_id", user["user_id"])
-        .eq("skill_id", skill["skill_id"])
+        .eq("user_id", user_id)
+        .eq("skill_id", skill_id)
         .execute()
     )
-
-    if not delete_res.data:
-        raise HTTPException(404, "Skill mapping not found")
-
-    return {
-        "message": f"Skill '{skill_name}' removed from user '{username}'"
-    }
+    
+    if not res.data:
+        raise HTTPException(404, "User skill mapping not found")
+    
+    return {"message": f"Skill '{skill_name}' removed from user '{username}'"}

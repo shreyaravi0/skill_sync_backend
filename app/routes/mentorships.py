@@ -3,12 +3,14 @@ from app.db import get_supabase
 from app.schemas.mentorship_schema import MentorshipCreate
 from app.routes.users import get_user_by_username
 
-router = APIRouter(prefix="/mentorships", tags=["Mentorships"])
-
+router = APIRouter(
+    prefix="/mentorships",
+    tags=["Mentorships"]
+)
 # ---------------- CREATE ----------------
 @router.post("/")
 def create_mentorship(data: MentorshipCreate, supabase=Depends(get_supabase)):
-    
+
     # 1. Verify mentor exists
     mentor = get_user_by_username(data.mentor_name)
     if not mentor:
@@ -31,13 +33,40 @@ def create_mentorship(data: MentorshipCreate, supabase=Depends(get_supabase)):
     if data.mentor_name == data.mentee_name:
         raise HTTPException(400, "User cannot mentor themselves")
 
-    # 6. Insert mentorship
-    res = supabase.table("mentorships").insert({
-        "mentor_name": data.mentor_name,
-        "mentee_name": data.mentee_name
-    }).execute()
+    # 6. 🔥 CHECK IF MENTORSHIP ALREADY EXISTS
+    existing = (
+        supabase
+        .table("mentorships")
+        .select("*")
+        .eq("mentor_name", data.mentor_name)
+        .eq("mentee_name", data.mentee_name)
+        .execute()
+        .data
+    )
 
-    return {"message": "Mentorship created", "data": res.data[0]}
+    if existing:
+        # ✅ Do NOT create again
+        return {
+            "message": "Mentorship already exists",
+            "mentorship": existing[0]
+        }
+
+    # 7. ✅ CREATE MENTORSHIP ONLY IF NOT EXISTS
+    mentorship = (
+        supabase
+        .table("mentorships")
+        .insert({
+            "mentor_name": data.mentor_name,
+            "mentee_name": data.mentee_name,
+        })
+        .execute()
+        .data[0]
+    )
+
+    return {
+        "message": "Mentorship created successfully",
+        "mentorship": mentorship
+    }
 
 
 # ---------------- READ ALL ----------------

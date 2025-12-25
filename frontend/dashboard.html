@@ -1,62 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SkillSync — Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync — Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .notification.success { background: #10b981; }
+        .notification.error { background: #ef4444; }
+        .notification.info { background: #3b82f6; }
+
+        .skill-tag {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 6px 12px;
+            border-radius: 6px;
+            margin: 4px;
+            font-size: 14px;
+        }
+
+        .match-item, .mentorship-item, .opportunity-item, .user-item {
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+        }
+    </style>
 </head>
 
 <body>
 
 <header class="topbar">
-  <h1>SkillSync</h1>
-  <div class="top-right">
-    <span id="userDisplay"></span>
-    <button id="logoutBtn">Logout</button>
-  </div>
+    <h1>🎓 SkillSync</h1>
+    <div class="top-right">
+        <span id="userDisplay"></span>
+        <button id="logoutBtn" class="btn-logout">Logout</button>
+    </div>
 </header>
 
 <div class="container">
 
-  <!-- Profile -->
-  <div class="card">
-    <h2>My Profile</h2>
-    <ul id="profileList"></ul>
-  </div>
+    <!-- Profile -->
+    <div class="card profile-card">
+        <div class="card-header">
+            <h2>👤 My Profile</h2>
+            <button id="editProfileBtn" class="btn-icon">✏️</button>
+        </div>
+        <ul id="profileList"></ul>
 
-  <!-- Skills -->
-  <div class="card">
-    <h2>My Skills</h2>
-    <ul id="userSkillsList"></ul>
-    <select id="skillDropdown"></select>
-    <button id="addSkillBtn" class="btn primary-btn">Add Skill</button>
-  </div>
+        <div id="editProfileForm" class="form-section" style="display:none;">
+            <input id="editName" class="input-field" placeholder="Name">
+            <input id="editRole" class="input-field" placeholder="Role">
+            <select id="editExperience" class="input-field">
+                <option value="">Experience</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+                <option>Expert</option>
+            </select>
+            <textarea id="editSummary" class="input-field" placeholder="Summary"></textarea>
+            <div class="btn-group">
+                <button id="saveProfileBtn" class="btn primary-btn">Save</button>
+                <button id="cancelEditBtn" class="btn secondary-btn">Cancel</button>
+            </div>
+        </div>
+        <button id="deleteAccountBtn" class="btn danger-btn-small">Delete Account</button>
+    </div>
 
-  <!-- Matching -->
-  <div class="card">
-    <h2>Mentorship Matching</h2>
+    <!-- Skills -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🛠️ My Skills</h2>
+        </div>
+        <ul id="userSkillsList"></ul>
+        <div class="skill-form">
+            <select id="skillDropdown" class="input-field"></select>
+            <button id="addSkillBtn" class="btn primary-btn">+ Add Skill</button>
+        </div>
+    </div>
 
-    <label>Select role:</label>
-    <select id="matchRoleDropdown">
-      <option value="mentor">Mentor</option>
-      <option value="mentee">Mentee</option>
-    </select>
+    <!-- Matching -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🎯 Find Mentor Match</h2>
+        </div>
+        <button class="btn primary-btn" onclick="findMatches()">🔍 Find Matches</button>
+        <ul id="matchResult"></ul>
+    </div>
 
-    <button class="btn primary-btn" onclick="findMatches()">Find Matches</button>
-    <ul id="matchResult"></ul>
-  </div>
+    <!-- Mentorships -->
+    <div class="card">
+        <div class="card-header">
+            <h2>🤝 My Mentorships</h2>
+        </div>
+        <ul id="mentorshipList"></ul>
+    </div>
 
-  <!-- Mentorships -->
-  <div class="card">
-    <h2>My Mentorships</h2>
-    <ul id="mentorshipList"></ul>
-  </div>
+    <!-- ✅ FIXED Opportunities (ONLY ONE) -->
+    <div class="card opportunities-card">
+        <div class="card-header">
+            <h2>💼 Opportunities</h2>
+            <button id="createOppBtn" class="btn primary-btn">+ Create Opportunity</button>
+        </div>
 
-  <!-- Opportunities -->
-  <div class="card">
-    <h2>Opportunities</h2>
-    <ul id="opportunityList"></ul>
-  </div>
+        <div id="createOppForm" class="form-section" style="display:none;">
+            <input id="oppTitle" class="input-field" placeholder="Title *">
+            <textarea id="oppDescription" class="input-field" placeholder="Description"></textarea>
+
+            <!-- ✅ REQUIRED TYPE -->
+            <label>Opportunity Type *</label>
+            <select id="oppType" class="input-field">
+                <option value="job">Job</option>
+                <option value="internship">Internship</option>
+                <option value="mentorship">Mentorship</option>
+            </select>
+
+
+            <label>Required Skills</label>
+            <select id="oppSkills" class="input-field" multiple></select>
+
+            <div class="btn-group">
+                <button id="saveOppBtn" class="btn primary-btn">Create</button>
+                <button id="cancelOppBtn" class="btn secondary-btn">Cancel</button>
+            </div>
+        </div>
+
+        <ul id="opportunityList"></ul>
+    </div>
+
+    <!-- All Users -->
+    <div class="card">
+        <div class="card-header">
+            <h2>👥 All Users</h2>
+            <button id="refreshUsersBtn" class="btn-icon">🔄</button>
+        </div>
+        <ul id="allUsersList"></ul>
+    </div>
 
 </div>
 

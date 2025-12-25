@@ -4,16 +4,39 @@ from app.schemas.opportunity_schema import OpportunityCreate
 
 router = APIRouter()
 
-# CREATE
 @router.post("/")
-def create_opportunity(opp: OpportunityCreate, supabase = Depends(get_supabase)):
-    res = supabase.table("opportunities").insert({
-        "title": opp.title,
-        "description": opp.description,
-        "posted_by": opp.posted_by,
-        "type": opp.type
-    }).execute()
-    return res.data
+def create_opportunity(
+    data: OpportunityCreate,
+    supabase=Depends(get_supabase)
+):
+    # 1. (Optional but recommended) verify user exists
+    user = (
+        supabase.table("users")
+        .select("username")
+        .eq("username", data.posted_by)
+        .execute()
+        .data
+    )
+    if not user:
+        raise HTTPException(400, "User does not exist")
+
+    # 2. Insert opportunity
+    opp = (
+        supabase.table("opportunities")
+        .insert({
+            "title": data.title,
+            "description": data.description,
+            "posted_by": data.posted_by,
+            "type": data.type
+        })
+        .execute()
+        .data[0]
+    )
+
+    # 3. Return the created row (must include opp_id)
+    return opp
+
+
 
 # READ ALL
 @router.get("/")

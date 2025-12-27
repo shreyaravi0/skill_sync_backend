@@ -149,6 +149,77 @@ document.getElementById("saveProfileBtn").onclick = async () => {
     }
 };
 
+const searchInput = document.getElementById("searchInput");
+const searchResult = document.getElementById("searchResult");
+
+searchInput.addEventListener("keydown", async (e) => {
+    if (e.key !== "Enter") return;
+
+    const searchUsername = searchInput.value.trim();
+    if (!searchUsername) return;
+
+    searchResult.innerHTML = `<div class="loading">🔍 Searching...</div>`;
+
+    try {
+        const res = await fetch(`${ENDPOINTS.USERS}/${searchUsername}`, {
+            headers: AUTH_HEADERS
+        });
+
+        if (!res.ok) throw new Error("User not found");
+
+        const user = await res.json();
+
+        searchResult.innerHTML = `
+            <div class="search-user-card">
+                <div class="search-avatar">
+                    ${getInitials(user.name || user.username)}
+                </div>
+
+                <div class="search-user-info">
+                    <div class="search-user-name">
+                        ${user.name || "No Name"}
+                        <span class="search-username">@${user.username}</span>
+                    </div>
+
+                    <div class="search-user-meta">
+                        <span class="badge ${
+                            user.role === "mentor" ? "badge-mentor" : "badge-mentee"
+                        }">
+                            ${user.role}
+                        </span>
+                        <span class="search-exp">
+                            ${user.experience_level || "Experience not specified"}
+                        </span>
+                    </div>
+
+                    <div class="search-user-summary">
+                        ${user.profile_summary || "No profile summary available."}
+                    </div>
+                </div>
+
+                <div class="search-user-actions">
+                    ${
+                        user.username !== username
+                            ? `<button class="btn btn-primary"
+                                   onclick="addMentorship('${user.username}', '${user.role}')">
+                                   Connect
+                               </button>`
+                            : `<span class="self-tag">This is you</span>`
+                    }
+                </div>
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+        searchResult.innerHTML = `
+            <div class="search-error">❌ User not found</div>
+        `;
+    }
+});
+
+
+
+
 // Delete Account
 document.getElementById("deleteAccountBtn").onclick = async () => {
     if (confirm("⚠️ Are you sure you want to delete your account? This cannot be undone!")) {

@@ -5,173 +5,187 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillSync — Dashboard</title>
     <link rel="stylesheet" href="style.css">
-
-    <style>
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .notification.success { background: #10b981; }
-        .notification.error { background: #ef4444; }
-        .notification.info { background: #3b82f6; }
-
-        .skill-tag {
-            display: inline-block;
-            background: #e0e7ff;
-            color: #4f46e5;
-            padding: 6px 12px;
-            border-radius: 6px;
-            margin: 4px;
-            font-size: 14px;
-        }
-
-        .match-item, .mentorship-item, .opportunity-item, .user-item {
-            padding: 12px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            margin: 8px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-        }
-    </style>
 </head>
-
 <body>
-
-<header class="topbar">
-    <h1>🎓 SkillSync</h1>
-    <div class="top-right">
-        <span id="userDisplay"></span>
-        <button id="logoutBtn" class="btn-logout">Logout</button>
-    </div>
-</header>
-
-<div class="container">
-
-    <!-- Profile -->
-    <div class="card profile-card">
-        <div class="card-header">
-            <h2>👤 My Profile</h2>
-            <button id="editProfileBtn" class="btn-icon">✏️</button>
-        </div>
-        <ul id="profileList"></ul>
-
-        <div id="editProfileForm" class="form-section" style="display:none;">
-            <input id="editName" class="input-field" placeholder="Name">
-            <input id="editRole" class="input-field" placeholder="Role">
-            <select id="editExperience" class="input-field">
-                <option value="">Experience</option>
-                <option>Beginner</option>
-                <option>Intermediate</option>
-                <option>Advanced</option>
-                <option>Expert</option>
-            </select>
-            <textarea id="editSummary" class="input-field" placeholder="Summary"></textarea>
-            <div class="btn-group">
-                <button id="saveProfileBtn" class="btn primary-btn">Save</button>
-                <button id="cancelEditBtn" class="btn secondary-btn">Cancel</button>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+                <span>SkillSync</span>
+            </div>
+            <div class="header-actions">
+                <div class="user-badge">
+                    <div class="user-avatar" id="headerAvatar"></div>
+                    <span id="headerUsername"></span>
+                </div>
+                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
             </div>
         </div>
-        <button id="deleteAccountBtn" class="btn danger-btn-small">Delete Account</button>
-    </div>
+    </header>
 
-    <!-- Skills -->
-    <div class="card">
-        <div class="card-header">
-            <h2>🛠️ My Skills</h2>
-        </div>
-        <ul id="userSkillsList"></ul>
-        <div class="skill-form">
-            <select id="skillDropdown" class="input-field"></select>
-            <button id="addSkillBtn" class="btn primary-btn">+ Add Skill</button>
-        </div>
-    </div>
-
-    <!-- Matching -->
-    <div class="card">
-        <div class="card-header">
-            <h2>🎯 Find Mentor Match</h2>
-        </div>
-        <button class="btn primary-btn" onclick="findMatches()">🔍 Find Matches</button>
-        <ul id="matchResult"></ul>
-    </div>
-
-    <!-- Mentorships -->
-    <div class="card">
-        <div class="card-header">
-            <h2>🤝 My Mentorships</h2>
-        </div>
-        <ul id="mentorshipList"></ul>
-    </div>
-
-    <!-- ✅ FIXED Opportunities (ONLY ONE) -->
-    <div class="card opportunities-card">
-        <div class="card-header">
-            <h2>💼 Opportunities</h2>
-            <button id="createOppBtn" class="btn primary-btn">+ Create Opportunity</button>
-        </div>
-
-        <div id="createOppForm" class="form-section" style="display:none;">
-            <input id="oppTitle" class="input-field" placeholder="Title *">
-            <textarea id="oppDescription" class="input-field" placeholder="Description"></textarea>
-
-            <!-- ✅ REQUIRED TYPE -->
-            <label>Opportunity Type *</label>
-            <select id="oppType" class="input-field">
-                <option value="job">Job</option>
-                <option value="internship">Internship</option>
-                <option value="mentorship">Mentorship</option>
-            </select>
-
-
-            <label>Required Skills</label>
-            <select id="oppSkills" class="input-field" multiple></select>
-
-            <div class="btn-group">
-                <button id="saveOppBtn" class="btn primary-btn">Create</button>
-                <button id="cancelOppBtn" class="btn secondary-btn">Cancel</button>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Sidebar - Profile -->
+        <div>
+            <div class="card profile-card">
+                <div class="profile-avatar-large" id="profileAvatar"></div>
+                <div class="profile-name" id="profileName">Loading...</div>
+                <div class="profile-role">
+                    <span class="badge" id="profileRole"></span>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <div class="stat-value" id="skillCount">0</div>
+                        <div class="stat-label">Skills</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="mentorshipCount">0</div>
+                        <div class="stat-label">Connections</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.75rem;" id="editProfileBtn">✏️ Edit Profile</button>
+                <button class="btn btn-secondary" style="width: 100%;" id="deleteAccountBtn">🗑️ Delete Account</button>
+            </div>
+            
+            <!-- Skills Card -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">🛠️</div>
+                        My Skills
+                    </div>
+                </div>
+                <div class="skills-grid" id="userSkillsList">
+                    <div class="loading">Loading skills...</div>
+                </div>
+                <div class="skill-form">
+                    <select id="skillDropdown" class="input-field"></select>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="addSkillBtn">+ Add Skill</button>
+                </div>
             </div>
         </div>
 
-        <ul id="opportunityList"></ul>
-    </div>
-
-    <!-- All Users -->
-    <div class="card">
-        <div class="card-header">
-            <h2>👥 All Users</h2>
-            <button id="refreshUsersBtn" class="btn-icon">🔄</button>
+        <!-- Center - Main Content -->
+        <div>
+            <!-- Search -->
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search mentors, opportunities, skills..." id="searchInput">
+            </div>
+            
+            <!-- Matches Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">🎯</div>
+                        Top Matches
+                    </div>
+                    <button class="btn btn-primary" id="findMatchesBtn">Find Matches</button>
+                </div>
+                
+                <div class="match-grid" id="matchResult">
+                    <div class="no-data">Click "Find Matches" to discover mentors/mentees</div>
+                </div>
+            </div>
+            
+            <!-- Opportunities -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">💼</div>
+                        Opportunities
+                    </div>
+                    <button class="btn btn-primary" id="createOppBtn">+ Create</button>
+                </div>
+                
+                <!-- Create Opportunity Form -->
+                <div id="createOppForm" class="form-section" style="display:none; margin-bottom: 2rem;">
+                    <input id="oppTitle" class="input-field" placeholder="Title *">
+                    <textarea id="oppDescription" class="input-field" placeholder="Description"></textarea>
+                    <select id="oppType" class="input-field">
+                        <option value="job">Job</option>
+                        <option value="internship">Internship</option>
+                        <option value="mentorship">Mentorship</option>
+                    </select>
+                    <label style="color: var(--text-secondary); margin: 0.5rem 0;">Required Skills (hold Ctrl/Cmd to select multiple)</label>
+                    <select id="oppSkills" class="input-field" multiple style="min-height: 100px;"></select>
+                    <div class="btn-group" style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                        <button id="saveOppBtn" class="btn btn-primary" style="flex: 1;">Create</button>
+                        <button id="cancelOppBtn" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                    </div>
+                </div>
+                
+                <div class="opportunities-grid" id="opportunityList">
+                    <div class="loading">Loading opportunities...</div>
+                </div>
+            </div>
         </div>
-        <ul id="allUsersList"></ul>
+
+        <!-- Right Sidebar - Activity -->
+        <div>
+            <!-- Mentorships -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">🤝</div>
+                        My Connections
+                    </div>
+                </div>
+                
+                <div id="mentorshipList" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="loading">Loading connections...</div>
+                </div>
+            </div>
+            
+            <!-- All Users -->
+            <div class="card" style="margin-top: 2rem;">
+                <div class="card-header">
+                    <div class="card-title">
+                        <div class="card-icon">👥</div>
+                        All Users
+                    </div>
+                    <button class="btn-icon" id="refreshUsersBtn">🔄</button>
+                </div>
+                
+                <div id="allUsersList" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; overflow-y: auto;">
+                    <div class="loading">Loading users...</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-</div>
+    <!-- Edit Profile Modal -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Profile</h2>
+                <button class="btn-close" id="closeModalBtn">×</button>
+            </div>
+            <div class="modal-body">
+                <input id="editName" class="input-field" placeholder="Name">
+                <input id="editRole" class="input-field" placeholder="Role" readonly>
+                <select id="editExperience" class="input-field">
+                    <option value="">Select Experience Level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Expert">Expert</option>
+                </select>
+                <textarea id="editSummary" class="input-field" placeholder="Profile Summary"></textarea>
+                <div class="btn-group" style="display: flex; gap: 0.75rem;">
+                    <button id="saveProfileBtn" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                    <button id="cancelEditBtn" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<script src="dashboard.js"></script>
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script src="dashboard.js"></script>
 </body>
 </html>

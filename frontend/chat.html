@@ -2,27 +2,629 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SkillSync — Chat</title>
-    <link rel="stylesheet" href="chat.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillSync - Chat</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .chat-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            height: calc(100vh - 180px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-dark);
+        }
+        
+        .chat-user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            position: relative;
+        }
+        
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border: 2px solid var(--bg-dark);
+            border-radius: 50%;
+            display: none;
+        }
+        
+        .online-indicator.active {
+            display: block;
+            animation: pulse-green 2s infinite;
+        }
+        
+        @keyframes pulse-green {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+        
+        .chat-username {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        .chat-status {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .connection-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .connection-status.connected {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+        
+        .connection-status.disconnected {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: var(--bg-dark);
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            word-wrap: break-word;
+            animation: messageSlideIn 0.3s ease;
+        }
+        
+        @keyframes messageSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.sent {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.received {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border);
+        }
+        
+        .message-text {
+            margin-bottom: 0.25rem;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        
+        .chat-input-container {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-card);
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        .send-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .send-button:hover:not(:disabled) {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 1rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 70px;
+            align-self: flex-start;
+            margin-top: -0.5rem;
+        }
+        
+        .typing-indicator.show {
+            display: block;
+        }
+        
+        .typing-indicator span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        .empty-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+        
+        .empty-chat-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .loading-history {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: 0 1rem;
+                height: calc(100vh - 150px);
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header class="topbar">
-        <h1>SkillSync Chat</h1>
-        <div class="top-right">
-            <span id="userDisplay"></span>
-            <button id="backBtn">Back</button>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+                <span>SkillSync</span>
+            </div>
+            <div class="header-actions">
+                <span class="connection-status disconnected" id="connectionStatus">Connecting...</span>
+                <button class="btn btn-secondary" id="backBtn">← Back to Dashboard</button>
+            </div>
         </div>
     </header>
 
-    <div class="container">
-        <div class="card">
-            <h2>Chat</h2>
-            <div id="chatBox" style="height: 300px; border: 1px solid #ccc; padding: 5px; overflow-y: scroll; background:#f9f9f9; margin-bottom:5px;"></div>
-            <input id="chatInput" class="input-field" placeholder="Type a message">
-            <button id="sendBtn" class="btn primary-btn">Send</button>
+    <!-- Chat Container -->
+    <div class="chat-container">
+        <div class="chat-card">
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <div class="chat-avatar" id="chatAvatar">
+                        <span class="online-indicator" id="onlineIndicator"></span>
+                    </div>
+                    <div>
+                        <div class="chat-username" id="chatUsername">Loading...</div>
+                        <div class="chat-status" id="chatStatus">Checking status...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="loading-history">
+                    <div>Loading chat history...</div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input 
+                        type="text" 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Type a message..."
+                        autocomplete="off"
+                        disabled
+                    >
+                    <button class="send-button" id="sendBtn" disabled>
+                        ➤
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script type="module" src="chat.js"></script>
+    <script>
+        const API_WS = "ws://127.0.0.1:8000/ws";
+
+        // Session info
+        const username = localStorage.getItem("username");
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatWith = urlParams.get("chatWith");
+
+        if (!username || !chatWith) {
+            alert("Session expired or chat user missing");
+            window.location.href = "dashboard.html";
+        }
+
+        // DOM elements
+        const chatMessages = document.getElementById("chatMessages");
+        const chatInput = document.getElementById("chatInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const backBtn = document.getElementById("backBtn");
+        const chatAvatar = document.getElementById("chatAvatar");
+        const chatUsername = document.getElementById("chatUsername");
+        const chatStatus = document.getElementById("chatStatus");
+        const connectionStatus = document.getElementById("connectionStatus");
+        const typingIndicator = document.getElementById("typingIndicator");
+        const onlineIndicator = document.getElementById("onlineIndicator");
+
+        // WebSocket connection
+        let ws = null;
+        let reconnectInterval = null;
+        let typingTimeout = null;
+        let isTyping = false;
+
+        // Initialize UI
+        function getInitials(name) {
+            const parts = name.split("_");
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        chatAvatar.textContent = getInitials(chatWith);
+        chatUsername.textContent = chatWith;
+
+        backBtn.onclick = () => {
+            if (ws) ws.close();
+            window.location.href = "dashboard.html";
+        };
+
+        // ===============================
+        // WEBSOCKET CONNECTION
+        // ===============================
+        function connectWebSocket() {
+            ws = new WebSocket(`${API_WS}/chat/${username}`);
+
+            ws.onopen = () => {
+                console.log("✅ WebSocket connected");
+                connectionStatus.textContent = "Connected";
+                connectionStatus.className = "connection-status connected";
+                chatInput.disabled = false;
+                sendBtn.disabled = false;
+                
+                if (reconnectInterval) {
+                    clearInterval(reconnectInterval);
+                    reconnectInterval = null;
+                }
+
+                // Request chat history
+                ws.send(JSON.stringify({
+                    type: "get_history",
+                    with_user: chatWith
+                }));
+
+                // Check if other user is online
+                ws.send(JSON.stringify({
+                    type: "check_online",
+                    users: [chatWith]
+                }));
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleIncomingMessage(data);
+            };
+
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+            };
+
+            ws.onclose = () => {
+                console.log("❌ WebSocket disconnected");
+                connectionStatus.textContent = "Disconnected";
+                connectionStatus.className = "connection-status disconnected";
+                chatInput.disabled = true;
+                sendBtn.disabled = true;
+                
+                // Attempt to reconnect
+                if (!reconnectInterval) {
+                    reconnectInterval = setInterval(() => {
+                        console.log("🔄 Attempting to reconnect...");
+                        connectWebSocket();
+                    }, 3000);
+                }
+            };
+        }
+
+        // ===============================
+        // HANDLE INCOMING MESSAGES
+        // ===============================
+        function handleIncomingMessage(data) {
+            const type = data.type;
+
+            // 1. CHAT HISTORY
+            if (type === "history") {
+                chatMessages.innerHTML = "";
+                
+                if (data.messages.length === 0) {
+                    chatMessages.innerHTML = `
+                        <div class="empty-chat">
+                            <div class="empty-chat-icon">💬</div>
+                            <p>No messages yet. Start the conversation!</p>
+                        </div>
+                    `;
+                } else {
+                    data.messages.forEach(msg => {
+                        const isMe = msg.from_user === username;
+                        const timestamp = new Date(msg.created_at);
+                        appendMessage(msg.message, isMe, timestamp);
+                    });
+                }
+            }
+            
+            // 2. NEW MESSAGE
+            else if (type === "message") {
+                const emptyChat = chatMessages.querySelector('.empty-chat');
+                if (emptyChat) emptyChat.remove();
+
+                const isMe = data.from_user === username;
+                const timestamp = new Date(data.created_at);
+                appendMessage(data.message, isMe, timestamp);
+            }
+            
+            // 3. TYPING INDICATOR
+            else if (type === "typing") {
+                if (data.from_user === chatWith) {
+                    if (data.is_typing) {
+                        typingIndicator.classList.add("show");
+                        scrollToBottom();
+                    } else {
+                        typingIndicator.classList.remove("show");
+                    }
+                }
+            }
+            
+            // 4. ONLINE STATUS
+            else if (type === "online_status") {
+                const isOnline = data.users[chatWith];
+                if (isOnline) {
+                    chatStatus.textContent = "Online";
+                    onlineIndicator.classList.add("active");
+                } else {
+                    chatStatus.textContent = "Offline";
+                    onlineIndicator.classList.remove("active");
+                }
+            }
+            
+            // 5. ERROR
+            else if (type === "error") {
+                console.error("WebSocket error:", data.message);
+                alert(`Error: ${data.message}`);
+            }
+            
+            // 6. PONG (keep-alive)
+            else if (type === "pong") {
+                console.log("Received pong");
+            }
+        }
+
+        // ===============================
+        // SEND MESSAGE
+        // ===============================
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || !ws || ws.readyState !== WebSocket.OPEN) return;
+
+            // Send via WebSocket
+            ws.send(JSON.stringify({
+                type: "message",
+                from_user: username,
+                to_user: chatWith,
+                text: message
+            }));
+
+            chatInput.value = "";
+            chatInput.focus();
+
+            // Stop typing indicator
+            sendTypingIndicator(false);
+        }
+
+        function sendTypingIndicator(typing) {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return;
+            
+            ws.send(JSON.stringify({
+                type: "typing",
+                to_user: chatWith,
+                is_typing: typing
+            }));
+        }
+
+        // ===============================
+        // TYPING INDICATOR LOGIC
+        // ===============================
+        chatInput.addEventListener("input", () => {
+            if (!isTyping) {
+                isTyping = true;
+                sendTypingIndicator(true);
+            }
+
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+                sendTypingIndicator(false);
+            }, 1000);
+        });
+
+        sendBtn.addEventListener("click", sendMessage);
+        chatInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        // ===============================
+        // UI HELPER FUNCTIONS
+        // ===============================
+        function appendMessage(text, isMe = false, timestamp = new Date()) {
+            const div = document.createElement("div");
+            div.className = `message ${isMe ? "sent" : "received"}`;
+            
+            const time = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            div.innerHTML = `
+                <div class="message-text">${escapeHtml(text)}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(div);
+            scrollToBottom();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+
+        // ===============================
+        // PERIODIC CHECKS
+        // ===============================
+        // Check online status every 10 seconds
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: "check_online",
+                    users: [chatWith]
+                }));
+            }
+        }, 10000);
+
+        // Keep-alive ping every 30 seconds
+        setInterval(() => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: "ping" }));
+            }
+        }, 30000);
+
+        // ===============================
+        // INITIALIZE
+        // ===============================
+        connectWebSocket();
+        chatInput.focus();
+
+        // Cleanup on page unload
+        window.addEventListener("beforeunload", () => {
+            if (ws) ws.close();
+        });
+    </script>
 </body>
 </html>

@@ -2,139 +2,629 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>SkillSync — Login / Register</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillSync - Login & Register</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow-y: auto;
+    }
+
+    .auth-card,
+    .auth-section {
+      height: auto;
+      max-height: none;
+    }
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #ec4899;
+      --accent: #14b8a6;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --border: #334155;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    /* Animated Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+      animation: backgroundShift 20s ease infinite;
+      z-index: -1;
+    }
+    
+    @keyframes backgroundShift {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    /* Floating particles */
+    .particle {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: var(--primary);
+      border-radius: 50%;
+      opacity: 0.3;
+      animation: float-particle 20s infinite;
+    }
+    
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      50% { transform: translateY(-100vh) translateX(50px); }
+    }
+    
+    .auth-container {
+      width: 100%;
+      max-width: 450px;
+      padding: 2rem;
+      z-index: 1;
+    }
+    
+    .brand-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .logo-large {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      animation: pulse 2s ease-in-out infinite;
+      box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .brand-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    
+    .brand-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+    
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    
+    .tab-btn:not(.active):hover {
+      background: var(--bg-card-hover);
+    }
+    
+    .auth-section {
+      display: none;
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 0.5rem;
+    }
+    
+    .auth-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    /* Custom scrollbar */
+    .auth-section::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .auth-section::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+      border-radius: 4px;
+    }
+    
+    .auth-section::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    
+    .auth-section::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-dark);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      background: var(--bg-dark);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .input-field:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    .input-field::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.5;
+    }
+    
+    select.input-field {
+      cursor: pointer;
+    }
+    
+    textarea.input-field {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 1.5rem 0;
+      color: var(--text-secondary);
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .divider span {
+      padding: 0 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+      animation: shake 0.5s ease;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .success-message {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      display: none;
+    }
+    
+    .success-message.show {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @media (max-width: 768px) {
+      .auth-container {
+        padding: 1rem;
+      }
+      
+      .auth-card {
+        padding: 1.5rem;
+      }
+      
+      .brand-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
 </head>
 
-<body class="auth-body">
+<body>
+  <!-- Floating particles -->
+  <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+  <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+  <div class="particle" style="left: 40%; animation-delay: 1s;"></div>
+  <div class="particle" style="left: 50%; animation-delay: 3s;"></div>
+  <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+  <div class="particle" style="left: 70%; animation-delay: 2.5s;"></div>
+  <div class="particle" style="left: 80%; animation-delay: 4.5s;"></div>
+  <div class="particle" style="left: 90%; animation-delay: 1.5s;"></div>
 
-<div class="auth-container">
-  <h1 class="brand-title">SkillSync</h1>
-  <p class="subtitle">Find the right mentor. Build the right skills.</p>
-
-  <div class="auth-card">
-
-    <!-- LOGIN FORM -->
-    <div id="login-section">
-      <h2>Login</h2>
-      <form id="loginForm">
-        <input id="login-username" type="text" class="input-field" placeholder="Username" required>
-        <input id="login-password" type="password" class="input-field" placeholder="Password" required>
-        <button type="submit" class="btn primary-btn">Login</button>
-      </form>
-      <p class="switch-text">
-        New here? <button id="showRegisterBtn" class="link-btn">Register</button>
-      </p>
+  <div class="auth-container">
+    <div class="brand-header">
+      <div class="logo-large">🎓</div>
+      <h1 class="brand-title">SkillSync</h1>
+      <p class="brand-subtitle">Connect. Learn. Grow Together.</p>
     </div>
 
-    <!-- REGISTER FORM -->
-    <div id="register-section" style="display:none;">
-      <h2>Register</h2>
-      <form id="registerForm">
-        <input id="reg-username" type="text" class="input-field" placeholder="Username" required>
-        <input id="reg-name" type="text" class="input-field" placeholder="Full Name" required>
-        <input id="reg-password" type="password" class="input-field" placeholder="Password" required>
-        <select id="reg-role" class="input-field">
-          <option value="mentee">Mentee</option>
-          <option value="mentor">Mentor</option>
-        </select>
-        <input id="reg-phone" type="text" class="input-field" placeholder="Phone Number">
-        <input id="reg-experience" type="text" class="input-field" placeholder="Experience Level">
-        <textarea id="reg-summary" class="input-field" placeholder="Profile Summary"></textarea>
-        <button type="submit" class="btn primary-btn">Register</button>
-      </form>
-      <p class="switch-text">
-        Already have an account? <button id="showLoginBtn" class="link-btn">Login</button>
-      </p>
-    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="tab-btn active" id="loginTab">Login</button>
+        <button class="tab-btn" id="registerTab">Register</button>
+      </div>
 
+      <!-- Error/Success Messages -->
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <!-- LOGIN FORM -->
+      <div id="login-section" class="auth-section active">
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input id="login-username" type="text" class="input-field" placeholder="Enter your username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input id="login-password" type="password" class="input-field" placeholder="Enter your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div id="register-section" class="auth-section">
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input id="reg-username" type="text" class="input-field" placeholder="Choose a username" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input id="reg-name" type="text" class="input-field" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input id="reg-password" type="password" class="input-field" placeholder="Create a password" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">I am a *</label>
+            <select id="reg-role" class="input-field" required>
+              <option value="mentee">Mentee (Looking for guidance)</option>
+              <option value="mentor">Mentor (Want to help others)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input id="reg-phone" type="text" class="input-field" placeholder="Your phone number (optional)">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Experience Level</label>
+            <select id="reg-experience" class="input-field">
+              <option value="">Select experience level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Profile Summary</label>
+            <textarea id="reg-summary" class="input-field" placeholder="Tell us about yourself, your interests, and goals..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-const API = "http://127.0.0.1:8000";
+  <script>
+    const API = "http://127.0.0.1:8000";
 
-// --- TOGGLE LOGIN / REGISTER ---
-const loginSection = document.getElementById("login-section");
-const registerSection = document.getElementById("register-section");
-document.getElementById("showRegisterBtn").onclick = () => {
-  loginSection.style.display = "none";
-  registerSection.style.display = "block";
-};
-document.getElementById("showLoginBtn").onclick = () => {
-  registerSection.style.display = "none";
-  loginSection.style.display = "block";
-};
+    // Tab switching
+    const loginTab = document.getElementById("loginTab");
+    const registerTab = document.getElementById("registerTab");
+    const loginSection = document.getElementById("login-section");
+    const registerSection = document.getElementById("register-section");
+    const errorMessage = document.getElementById("errorMessage");
+    const successMessage = document.getElementById("successMessage");
 
-// --- LOGIN LOGIC ---
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const username = document.getElementById("login-username").value.trim();
-  const password = document.getElementById("login-password").value.trim();
+    loginTab.addEventListener("click", () => {
+      loginTab.classList.add("active");
+      registerTab.classList.remove("active");
+      loginSection.classList.add("active");
+      registerSection.classList.remove("active");
+      clearMessages();
+    });
 
-  const res = await fetch(`${API}/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  });
+    registerTab.addEventListener("click", () => {
+      registerTab.classList.add("active");
+      loginTab.classList.remove("active");
+      registerSection.classList.add("active");
+      loginSection.classList.remove("active");
+      clearMessages();
+    });
 
-  const data = await res.json();
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add("show");
+      successMessage.classList.remove("show");
+      setTimeout(() => errorMessage.classList.remove("show"), 5000);
+    }
 
-  if (!res.ok) {
-    alert(data.detail || "Login failed");
-    return;
-  }
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add("show");
+      errorMessage.classList.remove("show");
+    }
 
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("username", data.username);
-  localStorage.setItem("role", data.role);
-  window.location.href = "dashboard.html";
-});
+    function clearMessages() {
+      errorMessage.classList.remove("show");
+      successMessage.classList.remove("show");
+    }
 
-// --- REGISTER LOGIC ---
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    // LOGIN
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMessages();
+      
+      const username = document.getElementById("login-username").value.trim();
+      const password = document.getElementById("login-password").value.trim();
 
-  const payload = {
-    username: document.getElementById("reg-username").value.trim(),
-    name: document.getElementById("reg-name").value.trim(),
-    password: document.getElementById("reg-password").value.trim(),
-    role: document.getElementById("reg-role").value,
-    phone_number: document.getElementById("reg-phone").value.trim(),
-    experience_level: document.getElementById("reg-experience").value.trim(),
-    profile_summary: document.getElementById("reg-summary").value.trim()
-  };
+      if (!username || !password) {
+        showError("Please fill in all fields");
+        return;
+      }
 
-  const res = await fetch(`${API}/users/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+      try {
+        const res = await fetch(`${API}/users/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password })
+        });
 
-  const data = await res.json();
+        const data = await res.json();
 
-  if (!res.ok) {
-    alert(data.detail || "Registration failed");
-    return;
-  }
+        if (!res.ok) {
+          showError(data.detail || "Login failed");
+          return;
+        }
 
-  alert("Registration successful! Logging in...");
-  // AUTO LOGIN AFTER REGISTER
-  const loginRes = await fetch(`${API}/users/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: payload.username, password: payload.password })
-  });
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("role", data.role);
+        
+        showSuccess("Login successful! Redirecting...");
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1000);
+      } catch (err) {
+        showError("Connection error. Please try again.");
+        console.error(err);
+      }
+    });
 
-  const loginData = await loginRes.json();
-  if (!loginRes.ok) return alert(loginData.detail || "Login after registration failed");
+    // REGISTER
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMessages();
 
-  localStorage.setItem("token", loginData.token);
-  localStorage.setItem("username", loginData.username);
-  localStorage.setItem("role", loginData.role);
-  window.location.href = "dashboard.html";
-});
-</script>
+      const username = document.getElementById("reg-username").value.trim();
+      const name = document.getElementById("reg-name").value.trim();
+      const password = document.getElementById("reg-password").value.trim();
+      const role = document.getElementById("reg-role").value;
 
+      if (!username || !name || !password || !role) {
+        showError("Please fill in all required fields");
+        return;
+      }
+
+      const payload = {
+        username,
+        name,
+        password,
+        role,
+        phone_number: document.getElementById("reg-phone").value.trim(),
+        experience_level: document.getElementById("reg-experience").value,
+        profile_summary: document.getElementById("reg-summary").value.trim()
+      };
+
+      try {
+        const res = await fetch(`${API}/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.detail || "Registration failed");
+          return;
+        }
+
+        showSuccess("Account created! Logging you in...");
+
+        // Auto login
+        const loginRes = await fetch(`${API}/users/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: payload.username, password: payload.password })
+        });
+
+        const loginData = await loginRes.json();
+        
+        if (!loginRes.ok) {
+          showError("Account created but login failed. Please login manually.");
+          setTimeout(() => {
+            loginTab.click();
+          }, 2000);
+          return;
+        }
+
+        localStorage.setItem("token", loginData.token);
+        localStorage.setItem("username", loginData.username);
+        localStorage.setItem("role", loginData.role);
+        
+        setTimeout(() => {
+          window.location.href = "dashboard.html";
+        }, 1500);
+      } catch (err) {
+        showError("Connection error. Please try again.");
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>

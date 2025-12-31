@@ -1,17 +1,29 @@
+# app/main.py (FIXED for WebSocket)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match,chat
-# from app.routes import resume_ats
+from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat
+from app.utils.firebase_chat_db import get_firebase_chat_db
 
 app = FastAPI(
-    title="SkillSync Backend (Supabase)",
+    title="SkillSync Backend (Firebase + Supabase)",
     version="1.0.0"
 )
 
-# ---------------- CORS (Important for frontend) ----------------
+@app.on_event("startup")
+async def startup_event():
+    # Initialize Firebase
+    try:
+        get_firebase_chat_db()
+        print("✅ Firebase initialized")
+    except Exception as e:
+        print(f"⚠️ Firebase initialization failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+# ---------------- CORS (IMPORTANT: Must be before routers) ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],      # change this in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,10 +37,17 @@ app.include_router(mentorships.router)
 app.include_router(opportunity_skills.router, prefix="/opportunity-skills", tags=["Opportunity Skills"])
 app.include_router(user_skills.router)
 app.include_router(match.router, prefix="/match", tags=["Matching"])
-app.include_router(chat.router)
-# app.include_router(resume_ats.router)
+app.include_router(chat.router)  # WebSocket chat - NO PREFIX
 
 # ---------------- HEALTH CHECK ----------------
 @app.get("/")
 def root():
     return {"message": "SkillSync Backend is running 🚀"}
+
+# ---------------- DEBUG: List all routes ----------------
+@app.on_event("startup")
+async def show_routes():
+    print("\n📋 Registered Routes:")
+    for route in app.routes:
+        print(f"  {route.path}")
+    print()

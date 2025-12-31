@@ -1,8 +1,7 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from typing import Dict, List
-import json
+# app/routes/chat.py (DEBUG VERSION - Remove restrictions)
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from typing import Dict
 from datetime import datetime
-from app.db import get_supabase
 
 router = APIRouter(prefix="/ws", tags=["WebSocket Chat"])
 
@@ -39,7 +38,18 @@ manager = ConnectionManager()
 
 @router.websocket("/chat/{username}")
 async def websocket_endpoint(websocket: WebSocket, username: str):
-    supabase = get_supabase()
+    print(f"🔌 WebSocket connection attempt from: {username}")
+    
+    # Import Firebase here to avoid startup issues
+    try:
+        from app.utils.firebase_chat_db import get_firebase_chat_db
+        firebase_chat = get_firebase_chat_db()
+        print("✅ Firebase loaded successfully")
+    except Exception as e:
+        print(f"⚠️ Firebase error: {e}")
+        print("⚠️ Continuing without Firebase (messages won't persist)")
+        firebase_chat = None
+    
     await manager.connect(username, websocket)
     
     try:
@@ -48,6 +58,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             data = await websocket.receive_json()
             
             message_type = data.get("type")
+            print(f"📨 Received message type: {message_type} from {username}")
             
             # ===============================
             # 1. GET CHAT HISTORY
@@ -56,13 +67,10 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 other_user = data.get("with_user")
                 
                 try:
-                    # Query messages between these two users
-                    result = supabase.table("messages").select("*").or_(
-                        f"and(from_user.eq.{username},to_user.eq.{other_user}),"
-                        f"and(from_user.eq.{other_user},to_user.eq.{username})"
-                    ).order("created_at", desc=False).execute()
-                    
-                    messages = result.data if result.data else []
+                    if firebase_chat:
+                        messages = firebase_chat.get_chat_history(username, other_user)
+                    else:
+                        messages = []
                     
                     # Send history back to requester
                     await websocket.send_json({
@@ -75,8 +83,10 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 except Exception as e:
                     print(f"Error fetching history: {e}")
                     await websocket.send_json({
-                        "type": "error",
-                        "message": f"Failed to load history: {str(e)}"
+                        "type": "history",
+                        "with_user": other_user,
+                        "messages": [],
+                        "count": 0
                     })
             
             # ===============================
@@ -94,30 +104,28 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                     })
                     continue
                 
-                # Store message in database
-                try:
-                    result = supabase.table("messages").insert({
-                        "from_user": from_user,
-                        "to_user": to_user,
-                        "message": text
-                    }).execute()
-                    
-                    message_data = result.data[0] if result.data else {}
-                    message_id = message_data.get("id")
-                    created_at = message_data.get("created_at", datetime.utcnow().isoformat())
-                    
-                except Exception as e:
-                    print(f"Error storing message: {e}")
-                    await websocket.send_json({
-                        "type": "error",
-                        "message": f"Failed to send message: {str(e)}"
-                    })
-                    continue
+                # Store message in Firebase (if available)
+                message_id = None
+                created_at = datetime.utcnow().isoformat()
+                
+                if firebase_chat:
+                    try:
+                        message_data = firebase_chat.create_message(
+                            from_user=from_user,
+                            to_user=to_user,
+                            message=text
+                        )
+                        message_id = message_data.get("id")
+                        created_at = message_data.get("created_at", created_at)
+                        print(f"✅ Message saved to Firebase: {message_id}")
+                    except Exception as e:
+                        print(f"⚠️ Error storing message in Firebase: {e}")
+                        # Continue anyway - message will still be delivered in real-time
                 
                 # Prepare response message
                 response = {
                     "type": "message",
-                    "id": message_id,
+                    "id": message_id or f"temp_{datetime.utcnow().timestamp()}",
                     "from_user": from_user,
                     "to_user": to_user,
                     "message": text,
@@ -127,6 +135,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
                 # Send to recipient if online
                 if manager.is_online(to_user):
                     await manager.send_personal_message(response, to_user)
+                    print(f"✅ Message delivered to {to_user}")
                 
                 # Send confirmation back to sender
                 await websocket.send_json({
@@ -169,39 +178,25 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             # ===============================
             elif message_type == "get_conversations":
                 try:
-                    # Get all messages involving this user
-                    result = supabase.table("messages").select(
-                        "from_user, to_user, message, created_at"
-                    ).or_(
-                        f"from_user.eq.{username},to_user.eq.{username}"
-                    ).order("created_at", desc=True).execute()
+                    if firebase_chat:
+                        conversations = firebase_chat.get_conversations(username)
+                    else:
+                        conversations = []
                     
-                    # Group by conversation partner
-                    conversations = {}
-                    for msg in result.data:
-                        other_user = (
-                            msg["to_user"] if msg["from_user"] == username 
-                            else msg["from_user"]
-                        )
-                        
-                        if other_user not in conversations:
-                            conversations[other_user] = {
-                                "user": other_user,
-                                "last_message": msg["message"],
-                                "last_message_time": msg["created_at"],
-                                "is_online": manager.is_online(other_user)
-                            }
+                    # Add online status
+                    for conv in conversations:
+                        conv['is_online'] = manager.is_online(conv['user'])
                     
                     await websocket.send_json({
                         "type": "conversations",
-                        "data": list(conversations.values())
+                        "data": conversations
                     })
                     
                 except Exception as e:
                     print(f"Error fetching conversations: {e}")
                     await websocket.send_json({
-                        "type": "error",
-                        "message": f"Failed to load conversations: {str(e)}"
+                        "type": "conversations",
+                        "data": []
                     })
             
             # ===============================
@@ -210,19 +205,16 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             elif message_type == "mark_read":
                 other_user = data.get("from_user")
                 
-                try:
-                    # Update all unread messages from other_user as read
-                    supabase.table("messages").update({
-                        "read": True
-                    }).eq("from_user", other_user).eq("to_user", username).eq("read", False).execute()
-                    
-                    await websocket.send_json({
-                        "type": "marked_read",
-                        "from_user": other_user
-                    })
-                    
-                except Exception as e:
-                    print(f"Error marking read: {e}")
+                if firebase_chat:
+                    try:
+                        firebase_chat.mark_messages_read(other_user, username)
+                    except Exception as e:
+                        print(f"Error marking read: {e}")
+                
+                await websocket.send_json({
+                    "type": "marked_read",
+                    "from_user": other_user
+                })
             
             # ===============================
             # 7. DELETE CONVERSATION
@@ -230,23 +222,30 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
             elif message_type == "delete_conversation":
                 other_user = data.get("with_user")
                 
-                try:
-                    # Delete all messages between these users
-                    supabase.table("messages").delete().or_(
-                        f"and(from_user.eq.{username},to_user.eq.{other_user}),"
-                        f"and(from_user.eq.{other_user},to_user.eq.{username})"
-                    ).execute()
-                    
-                    await websocket.send_json({
-                        "type": "conversation_deleted",
-                        "with_user": other_user
-                    })
-                    
-                except Exception as e:
-                    print(f"Error deleting conversation: {e}")
+                if firebase_chat:
+                    try:
+                        success = firebase_chat.delete_conversation(username, other_user)
+                        
+                        if success:
+                            await websocket.send_json({
+                                "type": "conversation_deleted",
+                                "with_user": other_user
+                            })
+                        else:
+                            await websocket.send_json({
+                                "type": "error",
+                                "message": "Failed to delete conversation"
+                            })
+                    except Exception as e:
+                        print(f"Error deleting conversation: {e}")
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": f"Failed to delete conversation: {str(e)}"
+                        })
+                else:
                     await websocket.send_json({
                         "type": "error",
-                        "message": f"Failed to delete conversation: {str(e)}"
+                        "message": "Firebase not available"
                     })
             
             # ===============================
@@ -257,8 +256,11 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     
     except WebSocketDisconnect:
         manager.disconnect(username)
+        print(f"🔌 {username} disconnected normally")
     except Exception as e:
-        print(f"WebSocket error for {username}: {e}")
+        print(f"❌ WebSocket error for {username}: {e}")
+        import traceback
+        traceback.print_exc()
         manager.disconnect(username)
 
 @router.get("/online-users")

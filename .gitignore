@@ -1,1 +1,6 @@
 app/utils/firebase_key.json
+
+
+# Secrets
+app/utils/firebase_rkey.json
+.env

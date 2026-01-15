@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume ATS Scorer - SkillSync</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .resume-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .upload-section {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-section:hover {
+            border-color: var(--primary);
+            background: var(--bg-card-hover);
+        }
+        
+        .upload-section.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+        }
+        
+        .upload-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .analyzing {
+            display: none;
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .analyzing.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .results-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .results-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .score-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+        }
+        
+        .overall-score {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+        
+        .score-number {
+            font-size: 5rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1;
+        }
+        
+        .score-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        .score-feedback {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .detailed-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .score-item {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .score-item-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .score-item-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+        
+        .suggestions-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+        
+        .suggestion-item {
+            background: var(--bg-dark);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--warning);
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+        }
+        
+        .suggestion-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .keywords-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .keyword-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .keyword-box h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            margin: 0.25rem;
+        }
+        
+        .keyword-tag.missing {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        
+        .history-section {
+            margin-top: 3rem;
+        }
+        
+        .history-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateX(8px);
+        }
+        
+        .history-info {
+            flex: 1;
+        }
+        
+        .history-filename {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .history-date {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .history-score {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .detailed-scores {
+                grid-template-columns: 1fr;
+            }
+            
+            .keywords-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🎓</div>
+                <span>SkillSync</span>
+            </div>
+            <div class="header-actions">
+                <div class="user-badge">
+                    <div class="user-avatar" id="headerAvatar"></div>
+                    <span id="headerUsername"></span>
+                </div>
+                <button class="btn btn-secondary" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="resume-container">
+        <!-- Title Section -->
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+                📄 Resume ATS Scorer
+            </h1>
+            <p style="color: var(--text-secondary); font-size: 1.125rem;">
+                Upload your resume and get instant feedback on how well it performs with Applicant Tracking Systems
+            </p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
+                🔒 <strong>Privacy First:</strong> Your resume is analyzed but NOT stored. Only the analysis results are saved.
+            </p>
+        </div>
+
+        <!-- Upload Section -->
+        <div id="uploadSection" class="upload-section" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📤</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-hint">PDF or DOCX (Max 5MB)</div>
+            <input type="file" id="fileInput" accept=".pdf,.docx" />
+        </div>
+
+        <!-- Analyzing State -->
+        <div id="analyzingSection" class="analyzing">
+            <div class="spinner"></div>
+            <h3>Analyzing your resume...</h3>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">
+                This may take a few moments
+            </p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="results-section">
+            <!-- Overall Score -->
+            <div class="score-card">
+                <div class="overall-score">
+                    <div class="score-number" id="overallScore">0</div>
+                    <div class="score-label">Overall ATS Score</div>
+                    <div class="score-feedback" id="overallFeedback"></div>
+                </div>
+
+                <!-- Detailed Scores -->
+                <div class="detailed-scores">
+                    <div class="score-item">
+                        <div class="score-item-value" id="keywordScore">0</div>
+                        <div class="score-item-label">Keyword Match</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="keywordProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-value" id="formattingScore">0</div>
+                        <div class="score-item-label">Formatting</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="formattingProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-value" id="readabilityScore">0</div>
+                        <div class="score-item-label">Readability</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="readabilityProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-value" id="completenessScore">0</div>
+                        <div class="score-item-label">Completeness</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="completenessProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suggestions -->
+            <div class="suggestions-section">
+                <h2 style="margin-bottom: 1.5rem;">💡 Improvement Suggestions</h2>
+                <div id="suggestionsList"></div>
+            </div>
+
+            <!-- Keywords -->
+            <div class="keywords-section">
+                <div class="keyword-box">
+                    <h3>✅ Matched Keywords</h3>
+                    <div id="matchedKeywords"></div>
+                </div>
+                <div class="keyword-box">
+                    <h3>⚠️ Missing Keywords</h3>
+                    <div id="missingKeywords"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="card-header" style="margin-bottom: 1.5rem;">
+                <div class="card-title">
+                    <div class="card-icon">📊</div>
+                    Your Resume History
+                </div>
+                <button class="btn btn-primary" onclick="loadHistory()">🔄 Refresh</button>
+            </div>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer"></div>
+
+    <script>
+        const API = "http://127.0.0.1:8000";
+        const username = localStorage.getItem("username");
+        
+        if (!username) {
+            alert("Please login first");
+            window.location.href = "index.html";
+        }
+
+        // Set header info
+        document.getElementById("headerUsername").textContent = username;
+        document.getElementById("headerAvatar").textContent = username.substring(0, 2).toUpperCase();
+
+        // Notification function
+        function showNotification(msg, type = "info") {
+            const container = document.getElementById("notificationContainer");
+            const notif = document.createElement("div");
+            notif.className = `notification ${type}`;
+            notif.textContent = msg;
+            container.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.opacity = "0";
+                notif.style.transform = "translateX(400px)";
+                setTimeout(() => notif.remove(), 300);
+            }, 5000);
+        }
+
+        // Drag and drop
+        const uploadSection = document.getElementById("uploadSection");
+        
+        uploadSection.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadSection.classList.add("dragover");
+        });
+        
+        uploadSection.addEventListener("dragleave", () => {
+            uploadSection.classList.remove("dragover");
+        });
+        
+        uploadSection.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove("dragover");
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        // File input change
+        document.getElementById("fileInput").addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        // Handle file upload
+        async function handleFileUpload(file) {
+            // Validate file type
+            if (!file.name.endsWith('.pdf') && !file.name.endsWith('.docx')) {
+                showNotification("Please upload a PDF or DOCX file", "error");
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                showNotification("File is too large. Maximum size is 5MB", "error");
+                return;
+            }
+
+            // Show analyzing state
+            document.getElementById("uploadSection").style.display = "none";
+            document.getElementById("analyzingSection").classList.add("show");
+            document.getElementById("resultsSection").classList.remove("show");
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(
+                    `${API}/resume-ats/upload-and-score?username=${username}`,
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || "Failed to analyze resume");
+                }
+
+                const data = await response.json();
+                displayResults(data.score);
+                loadHistory();
+                showNotification("Resume analyzed successfully!", "success");
+
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification(error.message, "error");
+                document.getElementById("uploadSection").style.display = "block";
+            } finally {
+                document.getElementById("analyzingSection").classList.remove("show");
+            }
+        }
+
+        // Display results
+        function displayResults(score) {
+            document.getElementById("resultsSection").classList.add("show");
+            
+            // Overall score
+            animateScore("overallScore", score.overall_score);
+            document.getElementById("overallFeedback").textContent = score.overall_feedback;
+
+            // Detailed scores
+            animateScore("keywordScore", score.keyword_score);
+            animateScore("formattingScore", score.formatting_score);
+            animateScore("readabilityScore", score.readability_score);
+            animateScore("completenessScore", score.completeness_score);
+
+            // Progress bars
+            setTimeout(() => {
+                document.getElementById("keywordProgress").style.width = score.keyword_score + "%";
+                document.getElementById("formattingProgress").style.width = score.formatting_score + "%";
+                document.getElementById("readabilityProgress").style.width = score.readability_score + "%";
+                document.getElementById("completenessProgress").style.width = score.completeness_score + "%";
+            }, 300);
+
+            // Suggestions
+            const suggestionsList = document.getElementById("suggestionsList");
+            suggestionsList.innerHTML = "";
+            
+            if (score.suggestions && score.suggestions.length > 0) {
+                score.suggestions.forEach(suggestion => {
+                    const item = document.createElement("div");
+                    item.className = "suggestion-item";
+                    item.innerHTML = `
+                        <div class="suggestion-icon">💡</div>
+                        <div>${suggestion}</div>
+                    `;
+                    suggestionsList.appendChild(item);
+                });
+            } else {
+                suggestionsList.innerHTML = "<p>Great! No major suggestions.</p>";
+            }
+
+            // Matched keywords
+            const matchedKeywords = document.getElementById("matchedKeywords");
+            matchedKeywords.innerHTML = "";
+            
+            if (score.matched_keywords) {
+                Object.entries(score.matched_keywords).forEach(([category, keywords]) => {
+                    if (keywords.length > 0) {
+                        keywords.forEach(keyword => {
+                            const tag = document.createElement("span");
+                            tag.className = "keyword-tag";
+                            tag.textContent = keyword;
+                            matchedKeywords.appendChild(tag);
+                        });
+                    }
+                });
+            }
+
+            // Missing keywords
+            const missingKeywords = document.getElementById("missingKeywords");
+            missingKeywords.innerHTML = "";
+            
+            if (score.missing_keywords && score.missing_keywords.length > 0) {
+                score.missing_keywords.forEach(keyword => {
+                    const tag = document.createElement("span");
+                    tag.className = "keyword-tag missing";
+                    tag.textContent = keyword;
+                    missingKeywords.appendChild(tag);
+                });
+            } else {
+                missingKeywords.innerHTML = "<p>All important keywords present!</p>";
+            }
+
+            // Reset upload
+            document.getElementById("uploadSection").style.display = "block";
+            document.getElementById("fileInput").value = "";
+        }
+
+        // Animate score number
+        function animateScore(elementId, targetScore) {
+            const element = document.getElementById(elementId);
+            let currentScore = 0;
+            const increment = targetScore / 50;
+            
+            const interval = setInterval(() => {
+                currentScore += increment;
+                if (currentScore >= targetScore) {
+                    currentScore = targetScore;
+                    clearInterval(interval);
+                }
+                element.textContent = Math.round(currentScore);
+            }, 20);
+        }
+
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API}/resume-ats/scores/${username}`);
+                const data = await response.json();
+                
+                const historyList = document.getElementById("historyList");
+                historyList.innerHTML = "";
+
+                if (data.scores && data.scores.length > 0) {
+                    data.scores.forEach(score => {
+                        const item = document.createElement("div");
+                        item.className = "history-item";
+                        
+                        const date = new Date(score.created_at);
+                        const formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
+                        
+                        item.innerHTML = `
+                            <div class="history-info">
+                                <div class="history-filename">${score.file_name}</div>
+                                <div class="history-date">${formattedDate}</div>
+                            </div>
+                            <div class="history-score">${score.overall_score}</div>
+                            <div class="history-actions">
+                                <button class="btn btn-primary btn-small" onclick="viewScore('${score.id}')">View</button>
+                                <button class="btn-delete btn-small" onclick="deleteScore('${score.id}')">Delete</button>
+                            </div>
+                        `;
+                        historyList.appendChild(item);
+                    });
+                } else {
+                    historyList.innerHTML = '<div class="no-data">No resume history yet. Upload your first resume!</div>';
+                }
+
+            } catch (error) {
+                console.error("Error loading history:", error);
+                showNotification("Failed to load history", "error");
+            }
+        }
+
+        // View score details
+        async function viewScore(scoreId) {
+            try {
+                const response = await fetch(`${API}/resume-ats/score/${scoreId}`);
+                const score = await response.json();
+                displayResults(score);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification("Failed to load score details", "error");
+            }
+        }
+
+        // Delete score
+        async function deleteScore(scoreId) {
+            if (!confirm("Are you sure you want to delete this resume score?")) {
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `${API}/resume-ats/score/${scoreId}?username=${username}`,
+                    { method: "DELETE" }
+                );
+
+                if (!response.ok) throw new Error("Failed to delete");
+
+                showNotification("Score deleted successfully", "success");
+                loadHistory();
+            } catch (error) {
+                console.error("Error:", error);
+                showNotification("Failed to delete score", "error");
+            }
+        }
+
+        // Load history on page load
+        loadHistory();
+    </script>
+</body>
+</html>

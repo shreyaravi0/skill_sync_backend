@@ -118,6 +118,7 @@
             border-radius: 16px;
             word-wrap: break-word;
             animation: messageSlideIn 0.3s ease;
+            position: relative;
         }
         
         @keyframes messageSlideIn {
@@ -140,13 +141,242 @@
             border: 1px solid var(--border);
         }
         
+        /* Reply preview box - Enhanced nested message style */
+        .message-reply-preview {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            display: block;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .message-reply-preview:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: translateX(2px);
+        }
+        
+        .message.sent .message-reply-preview {
+            border-left-color: #93c5fd;
+            background: linear-gradient(90deg, rgba(147, 197, 253, 0.25), rgba(147, 197, 253, 0.1));
+            box-shadow: 0 2px 8px rgba(147, 197, 253, 0.1);
+        }
+        
+        .message.received .message-reply-preview {
+            border-left-color: var(--primary);
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.05));
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        }
+        
+        .reply-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 1;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .reply-icon {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .reply-username {
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: none;
+        }
+        
+        .message.sent .reply-username {
+            color: #93c5fd;
+        }
+        
+        .message.received .reply-username {
+            color: var(--primary);
+        }
+        
+        .reply-text {
+    opacity: 0.9;
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* Standard property (for compatibility / linters) */
+    line-clamp: 3;
+
+    /* Current browser support */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    margin-top: 0.35rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-style: italic;
+}
+
+        
+        .message.sent .reply-text {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        
+        .message.received .reply-text {
+            color: var(--text-secondary);
+        }
+        
         .message-text {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            font-size: 1rem;
+        }
+        
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            opacity: 0.8;
         }
         
         .message-time {
             font-size: 0.75rem;
-            opacity: 0.7;
+        }
+        
+        .message-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 20px;
+        }
+        
+        .status-icon {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        
+        .status-sent {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .status-delivered {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .status-read {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+        
+        .message-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+        
+        .btn-reply {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            padding: 0.4rem 0.7rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-reply:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.05);
+        }
+        
+        .reply-bar {
+            display: none;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(236, 72, 153, 0.15));
+            border-top: 3px solid var(--primary);
+            padding: 1rem 2rem;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .reply-bar.active {
+            display: flex;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .reply-bar-content {
+            flex: 1;
+        }
+        
+        .reply-bar-label {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .reply-bar-user {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        
+        .reply-bar-text {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-top: 0.25rem;
+        }
+        
+        .btn-cancel-reply {
+            background: rgba(239, 68, 68, 0.2);
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-cancel-reply:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: rotate(90deg);
         }
         
         .chat-input-container {
@@ -276,7 +506,6 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
@@ -290,7 +519,6 @@
         </div>
     </header>
 
-    <!-- Chat Container -->
     <div class="chat-container">
         <div class="chat-card">
             <div class="chat-header">
@@ -306,15 +534,25 @@
             </div>
             
             <div class="chat-messages" id="chatMessages">
-                <div class="loading-history">
-                    <div>Loading chat history...</div>
-                </div>
+                <div class="loading-history">Loading chat history...</div>
             </div>
             
             <div class="typing-indicator" id="typingIndicator">
                 <span></span>
                 <span></span>
                 <span></span>
+            </div>
+            
+            <div class="reply-bar" id="replyBar">
+                <div class="reply-bar-content">
+                    <div class="reply-bar-label">
+                        <span>↩</span>
+                        <span>REPLYING TO</span>
+                    </div>
+                    <div class="reply-bar-user" id="replyUsername"></div>
+                    <div class="reply-bar-text" id="replyText"></div>
+                </div>
+                <button class="btn-cancel-reply" id="cancelReplyBtn">×</button>
             </div>
             
             <div class="chat-input-container">
@@ -327,9 +565,7 @@
                         autocomplete="off"
                         disabled
                     >
-                    <button class="send-button" id="sendBtn" disabled>
-                        ➤
-                    </button>
+                    <button class="send-button" id="sendBtn" disabled>➤</button>
                 </div>
             </div>
         </div>
@@ -337,8 +573,6 @@
 
     <script>
         const API_WS = "ws://127.0.0.1:8000/ws";
-
-        // Session info
         const username = localStorage.getItem("username");
         const urlParams = new URLSearchParams(window.location.search);
         const chatWith = urlParams.get("chatWith");
@@ -348,7 +582,6 @@
             window.location.href = "dashboard.html";
         }
 
-        // DOM elements
         const chatMessages = document.getElementById("chatMessages");
         const chatInput = document.getElementById("chatInput");
         const sendBtn = document.getElementById("sendBtn");
@@ -359,14 +592,17 @@
         const connectionStatus = document.getElementById("connectionStatus");
         const typingIndicator = document.getElementById("typingIndicator");
         const onlineIndicator = document.getElementById("onlineIndicator");
+        const replyBar = document.getElementById("replyBar");
+        const replyUsername = document.getElementById("replyUsername");
+        const replyText = document.getElementById("replyText");
+        const cancelReplyBtn = document.getElementById("cancelReplyBtn");
 
-        // WebSocket connection
         let ws = null;
         let reconnectInterval = null;
         let typingTimeout = null;
         let isTyping = false;
+        let replyingToMessage = null;
 
-        // Initialize UI
         function getInitials(name) {
             const parts = name.split("_");
             if (parts.length >= 2) {
@@ -383,9 +619,23 @@
             window.location.href = "dashboard.html";
         };
 
-        // ===============================
-        // WEBSOCKET CONNECTION
-        // ===============================
+        function setReplyMessage(message) {
+            console.log("🔄 Setting reply to:", message);
+            replyingToMessage = message;
+            replyBar.classList.add('active');
+            replyUsername.textContent = message.from_user;
+            replyText.textContent = message.message;
+            chatInput.focus();
+        }
+
+        function cancelReply() {
+            console.log("❌ Canceling reply");
+            replyingToMessage = null;
+            replyBar.classList.remove('active');
+        }
+
+        cancelReplyBtn.onclick = cancelReply;
+
         function connectWebSocket() {
             ws = new WebSocket(`${API_WS}/chat/${username}`);
 
@@ -401,13 +651,11 @@
                     reconnectInterval = null;
                 }
 
-                // Request chat history
                 ws.send(JSON.stringify({
                     type: "get_history",
                     with_user: chatWith
                 }));
 
-                // Check if other user is online
                 ws.send(JSON.stringify({
                     type: "check_online",
                     users: [chatWith]
@@ -430,7 +678,6 @@
                 chatInput.disabled = true;
                 sendBtn.disabled = true;
                 
-                // Attempt to reconnect
                 if (!reconnectInterval) {
                     reconnectInterval = setInterval(() => {
                         console.log("🔄 Attempting to reconnect...");
@@ -440,13 +687,10 @@
             };
         }
 
-        // ===============================
-        // HANDLE INCOMING MESSAGES
-        // ===============================
         function handleIncomingMessage(data) {
+            console.log("📨 Received:", data.type, data);
             const type = data.type;
 
-            // 1. CHAT HISTORY
             if (type === "history") {
                 chatMessages.innerHTML = "";
                 
@@ -460,23 +704,57 @@
                 } else {
                     data.messages.forEach(msg => {
                         const isMe = msg.from_user === username;
-                        const timestamp = new Date(msg.created_at);
-                        appendMessage(msg.message, isMe, timestamp);
+                        appendMessage(msg, isMe);
                     });
+                    
+                    setTimeout(() => {
+                        if (ws && ws.readyState === WebSocket.OPEN) {
+                            ws.send(JSON.stringify({
+                                type: "mark_read",
+                                from_user: chatWith
+                            }));
+                        }
+                    }, 500);
                 }
             }
             
-            // 2. NEW MESSAGE
             else if (type === "message") {
                 const emptyChat = chatMessages.querySelector('.empty-chat');
                 if (emptyChat) emptyChat.remove();
 
                 const isMe = data.from_user === username;
-                const timestamp = new Date(data.created_at);
-                appendMessage(data.message, isMe, timestamp);
+                appendMessage(data, isMe);
+                
+                if (!isMe && ws && ws.readyState === WebSocket.OPEN) {
+                    setTimeout(() => {
+                        ws.send(JSON.stringify({
+                            type: "mark_read",
+                            from_user: chatWith
+                        }));
+                    }, 500);
+                }
             }
             
-            // 3. TYPING INDICATOR
+            else if (type === "status_update") {
+                console.log("🔵 Status update:", data.message_id, data.status);
+                updateMessageStatus(data.message_id, data.status);
+            }
+            
+            else if (type === "messages_read") {
+                console.log("🔵 Messages read by:", data.by_user);
+                const sentMessages = chatMessages.querySelectorAll('.message.sent');
+                sentMessages.forEach(msg => {
+                    const toUser = msg.getAttribute('data-to');
+                    if (toUser === data.by_user) {
+                        const statusIcon = msg.querySelector('.status-icon');
+                        if (statusIcon) {
+                            statusIcon.textContent = '✓✓';
+                            statusIcon.className = 'status-icon status-read';
+                        }
+                    }
+                });
+            }
+            
             else if (type === "typing") {
                 if (data.from_user === chatWith) {
                     if (data.is_typing) {
@@ -488,7 +766,6 @@
                 }
             }
             
-            // 4. ONLINE STATUS
             else if (type === "online_status") {
                 const isOnline = data.users[chatWith];
                 if (isOnline) {
@@ -500,37 +777,34 @@
                 }
             }
             
-            // 5. ERROR
             else if (type === "error") {
                 console.error("WebSocket error:", data.message);
-                alert(`Error: ${data.message}`);
             }
             
-            // 6. PONG (keep-alive)
             else if (type === "pong") {
                 console.log("Received pong");
             }
         }
 
-        // ===============================
-        // SEND MESSAGE
-        // ===============================
         async function sendMessage() {
             const message = chatInput.value.trim();
             if (!message || !ws || ws.readyState !== WebSocket.OPEN) return;
 
-            // Send via WebSocket
-            ws.send(JSON.stringify({
+            const messageData = {
                 type: "message",
                 from_user: username,
                 to_user: chatWith,
-                text: message
-            }));
+                text: message,
+                reply_to_id: replyingToMessage ? replyingToMessage.id : null
+            };
+
+            console.log("📤 Sending message:", messageData);
+
+            ws.send(JSON.stringify(messageData));
 
             chatInput.value = "";
+            cancelReply();
             chatInput.focus();
-
-            // Stop typing indicator
             sendTypingIndicator(false);
         }
 
@@ -544,9 +818,6 @@
             }));
         }
 
-        // ===============================
-        // TYPING INDICATOR LOGIC
-        // ===============================
         chatInput.addEventListener("input", () => {
             if (!isTyping) {
                 isTyping = true;
@@ -565,22 +836,89 @@
             if (e.key === "Enter") sendMessage();
         });
 
-        // ===============================
-        // UI HELPER FUNCTIONS
-        // ===============================
-        function appendMessage(text, isMe = false, timestamp = new Date()) {
+        function getStatusIcon(status) {
+            if (status === 'read') return '<span class="status-icon status-read">✓✓</span>';
+            if (status === 'delivered') return '<span class="status-icon status-delivered">✓✓</span>';
+            return '<span class="status-icon status-sent">✓</span>';
+        }
+
+        function appendMessage(msg, isMe = false) {
             const div = document.createElement("div");
             div.className = `message ${isMe ? "sent" : "received"}`;
+            div.setAttribute('data-id', msg.id);
+            div.setAttribute('data-from', msg.from_user);
+            div.setAttribute('data-to', msg.to_user);
             
+            const timestamp = new Date(msg.created_at);
             const time = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
+            // Build reply preview properly
+            let replyPreview = '';
+            console.log("📌 Checking reply:", msg.reply_to_id, msg.reply_to_message);
+            
+            if (msg.reply_to_message) {
+                const replyMsg = msg.reply_to_message;
+
+                replyPreview = `
+                    <div class="message-reply-preview">
+                        <div class="reply-header">
+                            <span class="reply-icon">↩</span>
+                            <span class="reply-username">
+                                ${escapeHtml(replyMsg.from_user === username ? "You" : replyMsg.from_user)}
+                            </span>
+                        </div>
+                        <div class="reply-text">
+                            ${escapeHtml(replyMsg.message)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const statusIcon = isMe ? getStatusIcon(msg.status || 'sent') : '';
+            
             div.innerHTML = `
-                <div class="message-text">${escapeHtml(text)}</div>
-                <div class="message-time">${time}</div>
+                <div class="message-actions">
+                    <button class="btn-reply" data-msg-id="${msg.id}" data-msg-from="${escapeHtml(msg.from_user)}" data-msg-text="${escapeHtml(msg.message)}">
+                        ↩ Reply
+                    </button>
+                </div>
+                ${replyPreview}
+                <div class="message-text">${escapeHtml(msg.message)}</div>
+                <div class="message-footer">
+                    <span class="message-time">${time}</span>
+                    <span class="message-status">${statusIcon}</span>
+                </div>
             `;
+            
+            const replyBtn = div.querySelector('.btn-reply');
+            if (replyBtn) {
+                replyBtn.onclick = () => {
+                    setReplyMessage({
+                        id: replyBtn.dataset.msgId,
+                        from_user: replyBtn.dataset.msgFrom,
+                        message: replyBtn.dataset.msgText
+                    });
+                };
+            }
             
             chatMessages.appendChild(div);
             scrollToBottom();
+        }
+
+        function updateMessageStatus(messageId, status) {
+            const msg = chatMessages.querySelector(`[data-id="${messageId}"]`);
+            if (msg) {
+                const statusIcon = msg.querySelector('.status-icon');
+                if (statusIcon) {
+                    if (status === 'read') {
+                        statusIcon.textContent = '✓✓';
+                        statusIcon.className = 'status-icon status-read';
+                    } else if (status === 'delivered') {
+                        statusIcon.textContent = '✓✓';
+                        statusIcon.className = 'status-icon status-delivered';
+                    }
+                }
+            }
         }
 
         function escapeHtml(text) {
@@ -595,10 +933,6 @@
             }, 100);
         }
 
-        // ===============================
-        // PERIODIC CHECKS
-        // ===============================
-        // Check online status every 10 seconds
         setInterval(() => {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({
@@ -608,20 +942,15 @@
             }
         }, 10000);
 
-        // Keep-alive ping every 30 seconds
         setInterval(() => {
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: "ping" }));
             }
         }, 30000);
 
-        // ===============================
-        // INITIALIZE
-        // ===============================
         connectWebSocket();
         chatInput.focus();
 
-        // Cleanup on page unload
         window.addEventListener("beforeunload", () => {
             if (ws) ws.close();
         });

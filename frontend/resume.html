@@ -87,6 +87,11 @@
             animation: fadeIn 0.5s ease;
         }
         
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         .score-card {
             background: var(--bg-card);
             border-radius: 20px;
@@ -119,6 +124,13 @@
         .score-feedback {
             color: rgba(255, 255, 255, 0.8);
             font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .score-metadata {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.875rem;
             margin-top: 1rem;
         }
         
@@ -226,58 +238,9 @@
             border-color: rgba(239, 68, 68, 0.4);
         }
         
-        .history-section {
-            margin-top: 3rem;
-        }
-        
-        .history-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .history-item:hover {
-            border-color: var(--primary);
-            transform: translateX(8px);
-        }
-        
-        .history-info {
-            flex: 1;
-        }
-        
-        .history-filename {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .history-date {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .history-score {
-            font-size: 2rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .history-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .btn-small {
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+        .analyze-another {
+            text-align: center;
+            margin-top: 2rem;
         }
         
         @media (max-width: 768px) {
@@ -319,7 +282,7 @@
                 Upload your resume and get instant feedback on how well it performs with Applicant Tracking Systems
             </p>
             <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.5rem;">
-                🔒 <strong>Privacy First:</strong> Your resume is analyzed but NOT stored. Only the analysis results are saved.
+                🔒 <strong>Privacy First:</strong> Your resume is analyzed instantly and NOT stored anywhere.
             </p>
         </div>
 
@@ -348,15 +311,26 @@
                     <div class="score-number" id="overallScore">0</div>
                     <div class="score-label">Overall ATS Score</div>
                     <div class="score-feedback" id="overallFeedback"></div>
+                    <div class="score-metadata">
+                        <div id="scoreFilename"></div>
+                        <div id="scoreDate"></div>
+                    </div>
                 </div>
 
                 <!-- Detailed Scores -->
                 <div class="detailed-scores">
                     <div class="score-item">
-                        <div class="score-item-value" id="keywordScore">0</div>
-                        <div class="score-item-label">Keyword Match</div>
+                        <div class="score-item-value" id="contactScore">0</div>
+                        <div class="score-item-label">Contact Info</div>
                         <div class="progress-bar">
-                            <div class="progress-fill" id="keywordProgress" style="width: 0%"></div>
+                            <div class="progress-fill" id="contactProgress" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-item-value" id="structureScore">0</div>
+                        <div class="score-item-label">Structure</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="structureProgress" style="width: 0%"></div>
                         </div>
                     </div>
                     <div class="score-item">
@@ -373,13 +347,6 @@
                             <div class="progress-fill" id="readabilityProgress" style="width: 0%"></div>
                         </div>
                     </div>
-                    <div class="score-item">
-                        <div class="score-item-value" id="completenessScore">0</div>
-                        <div class="score-item-label">Completeness</div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="completenessProgress" style="width: 0%"></div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -389,29 +356,24 @@
                 <div id="suggestionsList"></div>
             </div>
 
-            <!-- Keywords -->
+            <!-- Resume Analysis Details -->
             <div class="keywords-section">
                 <div class="keyword-box">
-                    <h3>✅ Matched Keywords</h3>
-                    <div id="matchedKeywords"></div>
+                    <h3>✅ Found Information</h3>
+                    <div id="foundInfo"></div>
                 </div>
                 <div class="keyword-box">
-                    <h3>⚠️ Missing Keywords</h3>
-                    <div id="missingKeywords"></div>
+                    <h3>📋 Resume Sections</h3>
+                    <div id="foundSections"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- History Section -->
-        <div class="history-section">
-            <div class="card-header" style="margin-bottom: 1.5rem;">
-                <div class="card-title">
-                    <div class="card-icon">📊</div>
-                    Your Resume History
-                </div>
-                <button class="btn btn-primary" onclick="loadHistory()">🔄 Refresh</button>
+            <!-- Analyze Another -->
+            <div class="analyze-another">
+                <button class="btn btn-primary" onclick="resetUpload()">
+                    📤 Analyze Another Resume
+                </button>
             </div>
-            <div id="historyList"></div>
         </div>
     </div>
 
@@ -500,7 +462,7 @@
 
             try {
                 const response = await fetch(
-                    `${API}/resume-ats/upload-and-score?username=${username}`,
+                    `${API}/resume-ats/analyze?username=${username}`,
                     {
                         method: "POST",
                         body: formData
@@ -514,8 +476,7 @@
 
                 const data = await response.json();
                 displayResults(data.score);
-                loadHistory();
-                showNotification("Resume analyzed successfully!", "success");
+                showNotification("Resume analyzed successfully! 🎉", "success");
 
             } catch (error) {
                 console.error("Error:", error);
@@ -533,19 +494,23 @@
             // Overall score
             animateScore("overallScore", score.overall_score);
             document.getElementById("overallFeedback").textContent = score.overall_feedback;
+            
+            // Metadata
+            document.getElementById("scoreFilename").textContent = `📄 ${score.filename || 'Resume'}`;
+            document.getElementById("scoreDate").textContent = `📅 Analyzed on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`;
 
             // Detailed scores
-            animateScore("keywordScore", score.keyword_score);
+            animateScore("contactScore", score.contact_score);
+            animateScore("structureScore", score.structure_score);
             animateScore("formattingScore", score.formatting_score);
             animateScore("readabilityScore", score.readability_score);
-            animateScore("completenessScore", score.completeness_score);
 
             // Progress bars
             setTimeout(() => {
-                document.getElementById("keywordProgress").style.width = score.keyword_score + "%";
+                document.getElementById("contactProgress").style.width = score.contact_score + "%";
+                document.getElementById("structureProgress").style.width = score.structure_score + "%";
                 document.getElementById("formattingProgress").style.width = score.formatting_score + "%";
                 document.getElementById("readabilityProgress").style.width = score.readability_score + "%";
-                document.getElementById("completenessProgress").style.width = score.completeness_score + "%";
             }, 300);
 
             // Suggestions
@@ -563,44 +528,63 @@
                     suggestionsList.appendChild(item);
                 });
             } else {
-                suggestionsList.innerHTML = "<p>Great! No major suggestions.</p>";
+                suggestionsList.innerHTML = '<p style="color: var(--success);">✨ Excellent! No major suggestions.</p>';
             }
 
-            // Matched keywords
-            const matchedKeywords = document.getElementById("matchedKeywords");
-            matchedKeywords.innerHTML = "";
+            // Found contact information
+            const foundInfo = document.getElementById("foundInfo");
+            foundInfo.innerHTML = "";
             
-            if (score.matched_keywords) {
-                Object.entries(score.matched_keywords).forEach(([category, keywords]) => {
-                    if (keywords.length > 0) {
-                        keywords.forEach(keyword => {
-                            const tag = document.createElement("span");
-                            tag.className = "keyword-tag";
-                            tag.textContent = keyword;
-                            matchedKeywords.appendChild(tag);
-                        });
-                    }
-                });
+            if (score.contact_info && Object.keys(score.contact_info).length > 0) {
+                const infoList = document.createElement("div");
+                infoList.style.cssText = "display: flex; flex-direction: column; gap: 0.5rem;";
+                
+                if (score.contact_info.name) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ Name: ${score.contact_info.name}</div>`;
+                }
+                if (score.contact_info.email) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ Email: ${score.contact_info.email}</div>`;
+                }
+                if (score.contact_info.phone) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ Phone: ${score.contact_info.phone}</div>`;
+                }
+                if (score.contact_info.linkedin) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ LinkedIn profile</div>`;
+                }
+                if (score.contact_info.portfolio) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ Portfolio/GitHub link</div>`;
+                }
+                if (score.contact_info.location) {
+                    infoList.innerHTML += `<div style="color: var(--success);">✓ Location</div>`;
+                }
+                
+                foundInfo.appendChild(infoList);
+            } else {
+                foundInfo.innerHTML = '<p style="color: var(--text-secondary);">No contact information detected</p>';
             }
 
-            // Missing keywords
-            const missingKeywords = document.getElementById("missingKeywords");
-            missingKeywords.innerHTML = "";
+            // Found sections
+            const foundSections = document.getElementById("foundSections");
+            foundSections.innerHTML = "";
             
-            if (score.missing_keywords && score.missing_keywords.length > 0) {
-                score.missing_keywords.forEach(keyword => {
+            if (score.found_sections && Object.keys(score.found_sections).length > 0) {
+                Object.keys(score.found_sections).forEach(section => {
                     const tag = document.createElement("span");
-                    tag.className = "keyword-tag missing";
-                    tag.textContent = keyword;
-                    missingKeywords.appendChild(tag);
+                    tag.className = "keyword-tag";
+                    tag.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+                    foundSections.appendChild(tag);
                 });
             } else {
-                missingKeywords.innerHTML = "<p>All important keywords present!</p>";
+                foundSections.innerHTML = '<p style="color: var(--text-secondary);">No standard sections detected</p>';
             }
 
-            // Reset upload
-            document.getElementById("uploadSection").style.display = "block";
-            document.getElementById("fileInput").value = "";
+            // Scroll to results
+            setTimeout(() => {
+                document.getElementById("resultsSection").scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }, 500);
         }
 
         // Animate score number
@@ -619,83 +603,15 @@
             }, 20);
         }
 
-        // Load history
-        async function loadHistory() {
-            try {
-                const response = await fetch(`${API}/resume-ats/scores/${username}`);
-                const data = await response.json();
-                
-                const historyList = document.getElementById("historyList");
-                historyList.innerHTML = "";
-
-                if (data.scores && data.scores.length > 0) {
-                    data.scores.forEach(score => {
-                        const item = document.createElement("div");
-                        item.className = "history-item";
-                        
-                        const date = new Date(score.created_at);
-                        const formattedDate = date.toLocaleDateString() + " " + date.toLocaleTimeString();
-                        
-                        item.innerHTML = `
-                            <div class="history-info">
-                                <div class="history-filename">${score.file_name}</div>
-                                <div class="history-date">${formattedDate}</div>
-                            </div>
-                            <div class="history-score">${score.overall_score}</div>
-                            <div class="history-actions">
-                                <button class="btn btn-primary btn-small" onclick="viewScore('${score.id}')">View</button>
-                                <button class="btn-delete btn-small" onclick="deleteScore('${score.id}')">Delete</button>
-                            </div>
-                        `;
-                        historyList.appendChild(item);
-                    });
-                } else {
-                    historyList.innerHTML = '<div class="no-data">No resume history yet. Upload your first resume!</div>';
-                }
-
-            } catch (error) {
-                console.error("Error loading history:", error);
-                showNotification("Failed to load history", "error");
-            }
+        // Reset upload for analyzing another resume
+        function resetUpload() {
+            document.getElementById("uploadSection").style.display = "block";
+            document.getElementById("resultsSection").classList.remove("show");
+            document.getElementById("fileInput").value = "";
+            
+            // Scroll to upload
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        // View score details
-        async function viewScore(scoreId) {
-            try {
-                const response = await fetch(`${API}/resume-ats/score/${scoreId}`);
-                const score = await response.json();
-                displayResults(score);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (error) {
-                console.error("Error:", error);
-                showNotification("Failed to load score details", "error");
-            }
-        }
-
-        // Delete score
-        async function deleteScore(scoreId) {
-            if (!confirm("Are you sure you want to delete this resume score?")) {
-                return;
-            }
-
-            try {
-                const response = await fetch(
-                    `${API}/resume-ats/score/${scoreId}?username=${username}`,
-                    { method: "DELETE" }
-                );
-
-                if (!response.ok) throw new Error("Failed to delete");
-
-                showNotification("Score deleted successfully", "success");
-                loadHistory();
-            } catch (error) {
-                console.error("Error:", error);
-                showNotification("Failed to delete score", "error");
-            }
-        }
-
-        // Load history on page load
-        loadHistory();
     </script>
 </body>
 </html>

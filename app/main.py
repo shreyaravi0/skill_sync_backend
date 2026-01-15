@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat,resume_ats
 from app.utils.firebase_chat_db import get_firebase_chat_db
-from app.utils.firebase_resume_db import get_resume_db
+
 
 app = FastAPI(
     title="SkillSync Backend (Firebase + Supabase)",
@@ -23,14 +23,7 @@ async def startup_event():
         import traceback
         traceback.print_exc()
 
-     # Initialize Firebase Resume DB
-    try:
-        get_resume_db()
-        print("✅ Firebase Resume DB initialized")
-    except Exception as e:
-        print(f"⚠️ Firebase Resume DB initialization failed: {e}")
-        import traceback
-        traceback.print_exc()
+    
 
 # ---------------- CORS (IMPORTANT: Must be before routers) ----------------
 app.add_middleware(

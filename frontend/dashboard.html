@@ -4,113 +4,1102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkillSync — Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #14b8a6;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border: #334155;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+            animation: backgroundShift 20s ease infinite;
+            z-index: -1;
+        }
+        
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* ===== LAYOUT ===== */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+    /* Standard property */
+    background-clip: text;
+
+    /* WebKit fallback (Chrome, Safari) */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 0 4px 4px 0;
+            transition: height 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .nav-item.active::before {
+            height: 70%;
+        }
+        
+        .nav-icon {
+            font-size: 1.5rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .user-profile:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+        
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            max-width: 1400px;
+        }
+        
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+
+    /* Standard */
+    background-clip: text;
+
+    /* WebKit (Chrome, Safari) */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+        
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        /* ===== CONTENT SECTIONS ===== */
+        .content-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== CARDS ===== */
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .card-icon {
+            font-size: 1.5rem;
+        }
+        
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+
+    /* Standard property */
+    background-clip: text;
+
+    /* WebKit fallback (Chrome, Safari) */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+        
+        /* ===== SKILLS ===== */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-tag {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.2));
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-tag:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-delete-skill {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-delete-skill:hover {
+            transform: scale(1.2);
+        }
+        
+        /* ===== INPUT FIELDS ===== */
+        .input-field {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+        
+        textarea.input-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* ===== MATCH ITEMS ===== */
+        .match-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .match-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .match-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .match-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .match-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .match-info {
+            flex: 1;
+        }
+        
+        .match-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .match-username {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .match-score {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--success), var(--accent));
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .match-skills {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-mentor {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .badge-mentee {
+            background: linear-gradient(135deg, var(--secondary), #db2777);
+            color: white;
+        }
+        
+        /* ===== LOADING & EMPTY STATES ===== */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+        
+        /* ===== OPPORTUNITIES (LinkedIn Post Style) ===== */
+        .opportunities-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+        }
+        
+        .opportunity-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .opportunity-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.2);
+        }
+        
+        .opp-header {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .opp-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.125rem;
+            flex-shrink: 0;
+        }
+        
+        .opp-author-info {
+            flex: 1;
+        }
+        
+        .opp-author-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .opp-meta {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .opp-timestamp {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .opp-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .opp-body {
+            padding: 1.5rem;
+        }
+        
+        .opp-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        
+        .opp-description {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.9375rem;
+            margin-bottom: 1rem;
+        }
+        
+        .opp-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .opp-tag {
+            padding: 0.375rem 0.75rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50px;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+        
+        .opp-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .opp-action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .opp-action-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+        
+        .opp-action-btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+        
+        .opp-action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+        
+        .opp-action-btn.danger {
+            color: var(--danger);
+        }
+        
+        .opp-action-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .opp-stats {
+            display: flex;
+            gap: 1.5rem;
+            padding: 0 1.5rem 1rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .opp-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        
+        .opp-stat-icon {
+            font-size: 1rem;
+        }
+        
+        /* ===== MOBILE RESPONSIVE ===== */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 200;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .stats-grid,
+            .match-grid,
+            .opportunities-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* ===== NOTIFICATIONS ===== */
+        #notificationContainer {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .notification {
+            padding: 1rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+            max-width: 400px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification.success { border-left: 4px solid var(--success); }
+        .notification.error { border-left: 4px solid var(--danger); }
+        .notification.info { border-left: 4px solid var(--primary); }
+        
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">🎓</div>
-                <span>SkillSync</span>
-            </div>
-            <div class="header-actions">
-                <div class="user-badge">
-                    <div class="user-avatar" id="headerAvatar"></div>
-                    <span id="headerUsername"></span>
-                </div>
-                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
-            </div>
-        </div>
-    </header>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Left Sidebar - Profile -->
-        <div>
-            <div class="card profile-card">
-                <div class="profile-avatar-large" id="profileAvatar"></div>
-                <div class="profile-name" id="profileName">Loading...</div>
-                <div class="profile-role">
-                    <span class="badge" id="profileRole"></span>
-                </div>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
                 
-                <div class="profile-stats">
-                    <div class="stat-box">
-                        <div class="stat-value" id="skillCount">0</div>
-                        <div class="stat-label">Skills</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="mentorshipCount">0</div>
-                        <div class="stat-label">Connections</div>
-                    </div>
+                    <span>SkillSync</span>
                 </div>
-                
-                <button class="btn btn-primary" style="width: 100%; margin-bottom: 0.75rem;" id="editProfileBtn">✏️ Edit Profile</button>
-                <button class="btn btn-secondary" style="width: 100%;" id="deleteAccountBtn">🗑️ Delete Account</button>
             </div>
             
-            <!-- Skills Card -->
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-icon">🛠️</div>
-                        My Skills
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-page="overview">
+                    
+                    <span>Overview</span>
+                </div>
+                <div class="nav-item" data-page="profile">
+                    
+                    <span>My Profile</span>
+                </div>
+                <div class="nav-item" data-page="skills">
+                    
+                    <span>Skills</span>
+                </div>
+                <div class="nav-item" data-page="matches">
+                    
+                    <span>Find Matches</span>
+                </div>
+                <div class="nav-item" data-page="connections">
+                    
+                    <span>My Connections</span>
+                </div>
+                <div class="nav-item" data-page="opportunities">
+                    
+                    <span>Opportunities</span>
+                </div>
+                <div class="nav-item" data-page="resume">
+                    
+                    <span>Resume ATS</span>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="sidebarAvatar"></div>
+                    <div class="user-info">
+                        <div class="user-name" id="sidebarUsername"></div>
+                        <div class="user-role" id="sidebarRole"></div>
                     </div>
                 </div>
-                <div class="skills-grid" id="userSkillsList">
-                    <div class="loading">Loading skills...</div>
-                </div>
-                <div class="skill-form">
-                    <select id="skillDropdown" class="input-field"></select>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;" id="addSkillBtn">+ Add Skill</button>
-                </div>
+                <button class="btn btn-danger" style="width: 100%;" onclick="logout()">
+                    Logout
+                </button>
             </div>
-        </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section class="content-section active" id="overview">
+                <div class="page-header">
+                    <h1 class="page-title">Welcome back! 👋</h1>
+                    <p class="page-subtitle">Here's what's happening with your mentorship journey</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statSkills">0</div>
+                        <div class="stat-label">Skills Added</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statConnections">0</div>
+                        <div class="stat-label">Active Connections</div>
+                    </div>
+                    <div class="stat-card">
 
-        <!-- Center - Main Content -->
-        <div>
-           <div class="search-container">
-    <span class="search-icon">🔍</span>
-    <input
-        type="text"
-        class="search-input"
-        placeholder="Search users..."
-        id="searchInput"
-    />
+             
+                        <div class="stat-value" id="statOpportunities">0</div>
+                        <div class="stat-label">Opportunities</div>
+                    </div>
+                    <!-- <div class="stat-card">
+                        
+                        <div class="stat-value" id="statMatches">0</div>
+                        <div class="stat-label">Potential Matches</div>
+                    </div> -->
+                </div>
+                <!-- SEARCH USERS CARD -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <span class="card-icon">🔍</span>
+            Search Users
+        </div>
+    </div>
+    <div style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+        <input 
+            type="text" 
+            id="overviewSearchInput" 
+            class="input-field" 
+            placeholder="Enter username to search..."
+            onkeypress="if(event.key === 'Enter') searchUserFromOverview()"
+            style="flex: 1; margin: 0;"
+        >
+        <button class="btn btn-primary" onclick="searchUserFromOverview()">Search</button>
+    </div>
+    <div id="overviewSearchResults"></div>
 </div>
-
-<!-- Search Result -->
-<div id="searchResult" class="search-result"></div>
-
-            
-            <!-- Matches Card -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-icon">🎯</div>
-                        Top Matches
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            
+                            Quick Actions
+                        </div>
                     </div>
-                    <button class="btn btn-primary" id="findMatchesBtn">Find Matches</button>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <button class="btn btn-primary" onclick="navigateTo('matches')">
+                            Find Matches
+                        </button>
+                        <button class="btn btn-primary" onclick="navigateTo('skills')">
+                            Add Skills
+                        </button>
+                        <button class="btn btn-primary" onclick="navigateTo('opportunities')">
+                            Browse Opportunities
+                        </button>
+                        <button class="btn btn-primary" onclick="navigateTo('resume')">
+                            Check Resume Score
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Profile Section -->
+            <section class="content-section" id="profile">
+                <div class="page-header">
+                    <h1 class="page-title">My Profile</h1>
+                    <p class="page-subtitle">Manage your account information</p>
                 </div>
                 
-                <div class="match-grid" id="matchResult">
-                    <div class="no-data">Click "Find Matches" to discover mentors/mentees</div>
-                </div>
-            </div>
-            
-            <!-- Opportunities -->
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-icon">💼</div>
-                        Opportunities
+                <div class="card">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div class="user-avatar" id="profileAvatar" style="width: 120px; height: 120px; font-size: 2.5rem; margin: 0 auto 1rem;"></div>
+                        <h2 id="profileName">Loading...</h2>
+                        <span class="badge" id="profileBadge"></span>
                     </div>
-                    <button class="btn btn-primary" id="createOppBtn">+ Create</button>
+                    
+                    <div style="max-width: 600px; margin: 0 auto;">
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Name</label>
+                        <input id="editName" class="input-field" placeholder="Your name">
+                        
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Role</label>
+                        <input id="editRole" class="input-field" placeholder="Role" readonly>
+                        
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Experience Level</label>
+                        <select id="editExperience" class="input-field">
+                            <option value="">Select Experience Level</option>
+                            <option value="Beginner">Beginner</option>
+                            <option value="Intermediate">Intermediate</option>
+                            <option value="Advanced">Advanced</option>
+                            <option value="Expert">Expert</option>
+                        </select>
+                        
+                        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-weight: 500;">Profile Summary</label>
+                        <textarea id="editSummary" class="input-field" placeholder="Tell us about yourself..."></textarea>
+                        
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-primary" style="flex: 1;" onclick="saveProfile()">Save Changes</button>
+                            <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Skills Section -->
+            <section class="content-section" id="skills">
+                <div class="page-header">
+                    <h1 class="page-title">My Skills</h1>
+                    <p class="page-subtitle">Add and manage your skill set</p>
                 </div>
                 
-                <!-- Create Opportunity Form -->
-                <div id="createOppForm" class="form-section" style="display:none; margin-bottom: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-icon">🛠️</span>
+                            Your Skills
+                        </div>
+                    </div>
+                    <div class="skills-grid" id="skillsList">
+                        <div class="loading"><div class="spinner"></div>Loading skills...</div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="card-icon">➕</span>
+                            Add New Skill
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <select id="skillDropdown" class="input-field" style="flex: 1; margin: 0;">
+                            <option value="">Select a skill...</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="addSkill()">Add Skill</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Matches Section -->
+            <section class="content-section" id="matches">
+                <div class="page-header">
+                    <h1 class="page-title">Find Your Match</h1>
+                    <p class="page-subtitle">Discover mentors and mentees based on your skills</p>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="findMatches()">
+                        🔍 Find Matches
+                    </button>
+                </div>
+                
+                <div class="match-grid" id="matchesGrid">
+                    <div class="no-data">Click "Find Matches" to discover your perfect mentorship connections</div>
+                </div>
+            </section>
+            
+            <!-- Connections Section -->
+            <section class="content-section" id="connections">
+                <div class="page-header">
+                    <h1 class="page-title">My Connections</h1>
+                    <p class="page-subtitle">View and manage your mentorship relationships</p>
+                </div>
+                
+                <div class="match-grid" id="connectionsGrid">
+                    <div class="loading"><div class="spinner"></div>Loading connections...</div>
+                </div>
+            </section>
+            
+            <!-- Opportunities Section -->
+            <section class="content-section" id="opportunities">
+                <div class="page-header">
+                    <h1 class="page-title">Opportunities</h1>
+                    <p class="page-subtitle">Explore jobs, internships, and mentorship opportunities</p>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <button class="btn btn-primary" onclick="toggleOppForm()">
+                        ➕ Create Opportunity
+                    </button>
+                </div>
+                
+                <div class="card" id="oppForm" style="display: none; margin-bottom: 2rem;">
+                    <div class="card-header">
+                        <div class="card-title">
+                            
+                            Create New Opportunity
+                        </div>
+                    </div>
                     <input id="oppTitle" class="input-field" placeholder="Title *">
                     <textarea id="oppDescription" class="input-field" placeholder="Description"></textarea>
                     <select id="oppType" class="input-field">
@@ -118,92 +1107,717 @@
                         <option value="internship">Internship</option>
                         <option value="mentorship">Mentorship</option>
                     </select>
-                    <label style="color: var(--text-secondary); margin: 0.5rem 0;">Required Skills (hold Ctrl/Cmd to select multiple)</label>
-                    <select id="oppSkills" class="input-field" multiple style="min-height: 100px;"></select>
-                    <div class="btn-group" style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                        <button id="saveOppBtn" class="btn btn-primary" style="flex: 1;">Create</button>
-                        <button id="cancelOppBtn" class="btn btn-secondary" style="flex: 1;">Cancel</button>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-primary" style="flex: 1;" onclick="createOpportunity()">Create</button>
+                        <button class="btn btn-secondary" onclick="toggleOppForm()">Cancel</button>
                     </div>
                 </div>
                 
-                <div class="opportunities-grid" id="opportunityList">
-                    <div class="loading">Loading opportunities...</div>
+                <div class="opportunities-grid" id="opportunitiesGrid">
+                    <div class="loading"><div class="spinner"></div>Loading opportunities...</div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Right Sidebar - Activity -->
-        <div>
-            <!-- Mentorships -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-icon">🤝</div>
-                        My Connections
-                    </div>
-                </div>
-                
-                <div id="mentorshipList" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div class="loading">Loading connections...</div>
-                </div>
-            </div>
+            </section>
             
-            <!-- All Users -->
-            <div class="card" style="margin-top: 2rem;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-icon">👥</div>
-                        All Users
-                    </div>
-                    <button class="btn-icon" id="refreshUsersBtn">🔄</button>
+            <!-- Resume Section -->
+            <section class="content-section" id="resume">
+                <div class="page-header">
+                    <h1 class="page-title">Resume ATS Scorer</h1>
+                    <p class="page-subtitle">Get instant feedback on your resume's performance</p>
                 </div>
                 
-                <div id="allUsersList" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; overflow-y: auto;">
-                    <div class="loading">Loading users...</div>
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📄</div>
+                    <h3 style="margin-bottom: 1rem;">Analyze Your Resume</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Upload your resume to get a comprehensive ATS score and improvement suggestions
+                    </p>
+                    <button class="btn btn-primary" onclick="window.location.href='resume.html'">
+                        Go to Resume Scorer →
+                    </button>
                 </div>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
-
-    <!-- Edit Profile Modal -->
-    <div id="editProfileModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Edit Profile</h2>
-                <button class="btn-close" id="closeModalBtn">×</button>
-            </div>
-            <div class="modal-body">
-                <input id="editName" class="input-field" placeholder="Name">
-                <input id="editRole" class="input-field" placeholder="Role" readonly>
-                <select id="editExperience" class="input-field">
-                    <option value="">Select Experience Level</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
-                    <option value="Expert">Expert</option>
-                </select>
-                <textarea id="editSummary" class="input-field" placeholder="Profile Summary"></textarea>
-                <div class="btn-group" style="display: flex; gap: 0.75rem;">
-                    <button id="saveProfileBtn" class="btn btn-primary" style="flex: 1;">Save Changes</button>
-                    <button id="cancelEditBtn" class="btn btn-secondary" style="flex: 1;">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    
     <!-- Notification Container -->
     <div id="notificationContainer"></div>
 
-    <script src="dashboard.js"></script>
+    <script>
+        const API = "http://127.0.0.1:8000";
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+        const role = localStorage.getItem("role");
 
-    <!-- Add this to your dashboard.html in the profile card section, after the Delete Account button -->
+        if (!token || !username) {
+            alert("Session expired");
+            window.location.href = "index.html";
+        }
 
-<button 
-    class="btn btn-primary" 
-    style="width: 100%; margin-top: 0.75rem;"
-    onclick="window.location.href='resume.html'">
-    📄 Resume ATS Scorer
-</button>
-</div>
+        const AUTH_HEADERS = {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        };
+
+        let currentUserData = {};
+        let allSkills = [];
+
+        // ===== UTILITY FUNCTIONS =====
+        function getInitials(name) {
+            if (!name) return "??";
+            const parts = name.split(" ");
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        function showNotification(msg, type = "info") {
+            const container = document.getElementById("notificationContainer");
+            const notif = document.createElement("div");
+            notif.className = `notification ${type}`;
+            notif.textContent = msg;
+            container.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.opacity = "0";
+                notif.style.transform = "translateX(400px)";
+                setTimeout(() => notif.remove(), 300);
+            }, 4000);
+        }
+
+        // ===== NAVIGATION =====
+        function navigateTo(page) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(page).classList.add('active');
+            document.querySelector(`[data-page="${page}"]`).classList.add('active');
+            
+            if (window.innerWidth <= 1024) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                navigateTo(page);
+            });
+        });
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // ===== INITIALIZATION =====
+        async function init() {
+            const initials = getInitials(username);
+            document.getElementById('sidebarAvatar').textContent = initials;
+            document.getElementById('sidebarUsername').textContent = username;
+            document.getElementById('sidebarRole').textContent = role;
+            
+            await loadProfile();
+            await loadAllSkills();
+            await loadUserSkills();
+            await loadConnections();
+            await loadOpportunities();
+            updateOverviewStats();
+        }
+
+        // ===== PROFILE =====
+        async function loadProfile() {
+            try {
+                const res = await fetch(`${API}/users/${username}`, { headers: AUTH_HEADERS });
+                currentUserData = await res.json();
+                
+                const initials = getInitials(currentUserData.name);
+                document.getElementById('profileAvatar').textContent = initials;
+                document.getElementById('profileName').textContent = currentUserData.name || username;
+                
+                const badge = document.getElementById('profileBadge');
+                badge.textContent = currentUserData.role || "User";
+                badge.className = currentUserData.role === "mentor" ? "badge badge-mentor" : "badge badge-mentee";
+                
+                document.getElementById('editName').value = currentUserData.name || "";
+                document.getElementById('editRole').value = currentUserData.role || "";
+                document.getElementById('editExperience').value = currentUserData.experience_level || "";
+                document.getElementById('editSummary').value = currentUserData.profile_summary || "";
+            } catch (err) {
+                console.error("Failed to load profile:", err);
+                showNotification("Failed to load profile", "error");
+            }
+        }
+
+        async function saveProfile() {
+            const updatedData = {
+                name: document.getElementById('editName').value,
+                role: document.getElementById('editRole').value,
+                experience_level: document.getElementById('editExperience').value,
+                profile_summary: document.getElementById('editSummary').value
+            };
+            
+            try {
+                const res = await fetch(`${API}/users/${username}`, {
+                    method: "PUT",
+                    headers: AUTH_HEADERS,
+                    body: JSON.stringify(updatedData)
+                });
+                
+                if (!res.ok) throw new Error("Failed to update profile");
+                
+                showNotification("Profile updated successfully", "success");
+                loadProfile();
+            } catch (err) {
+                console.error(err);
+                showNotification("Failed to update profile", "error");
+            }
+        }
+
+        async function deleteAccount() {
+            if (confirm("⚠️ Are you sure you want to delete your account? This cannot be undone!")) {
+                try {
+                    await fetch(`${API}/users/${username}`, {
+                        method: "DELETE",
+                        headers: AUTH_HEADERS
+                    });
+                    localStorage.clear();
+                    window.location.href = "index.html";
+                } catch (err) {
+                    console.error(err);
+                    showNotification("Failed to delete account", "error");
+                }
+            }
+        }
+
+        function logout() {
+            if (confirm("Are you sure you want to logout?")) {
+                localStorage.clear();
+                window.location.href = "index.html";
+            }
+        }
+
+        // ===== SKILLS =====
+        async function loadAllSkills() {
+            try {
+                const res = await fetch(`${API}/skills/`, { headers: AUTH_HEADERS });
+                allSkills = await res.json();
+                
+                const dropdown = document.getElementById('skillDropdown');
+                dropdown.innerHTML = '<option value="">Select a skill...</option>';
+                allSkills.forEach(s => {
+                    const opt = document.createElement("option");
+                    opt.value = s.name;
+                    opt.textContent = s.name;
+                    dropdown.appendChild(opt);
+                });
+            } catch (err) {
+                console.error("Failed to load skills:", err);
+            }
+        }
+
+        async function loadUserSkills() {
+            try {
+                const res = await fetch(`${API}/user-skills/${username}`, { headers: AUTH_HEADERS });
+                const skills = res.ok ? await res.json() : [];
+                
+                const list = document.getElementById('skillsList');
+                list.innerHTML = "";
+                
+                if (skills.length === 0) {
+                    list.innerHTML = '<div class="no-data">No skills added yet. Add your first skill!</div>';
+                    return;
+                }
+                
+                skills.forEach(s => {
+                    const tag = document.createElement("div");
+                    tag.className = "skill-tag";
+                    tag.innerHTML = `
+                        ${s.name || s.skill_name || "Unknown"}
+                        <button class="btn-delete-skill" onclick="removeSkill('${s.name || s.skill_name}')">×</button>
+                    `;
+                    list.appendChild(tag);
+                });
+            } catch (err) {
+                console.error("Failed to load user skills:", err);
+            }
+        }
+
+        async function addSkill() {
+            const skillName = document.getElementById('skillDropdown').value;
+            if (!skillName) {
+                showNotification("Please select a skill", "error");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API}/user-skills/`, {
+                    method: "POST",
+                    headers: AUTH_HEADERS,
+                    body: JSON.stringify({ username, skill_names: [skillName] })
+                });
+                
+                if (!res.ok) {
+                    const e = await res.json();
+                    throw new Error(e.detail || "Failed to add skill");
+                }
+                
+                showNotification("Skill added successfully", "success");
+                document.getElementById('skillDropdown').value = "";
+                loadUserSkills();
+                updateOverviewStats();
+            } catch (err) {
+                console.error(err);
+                showNotification(err.message, "error");
+            }
+        }
+
+        async function removeSkill(skillName) {
+            if (!confirm(`Remove skill: ${skillName}?`)) return;
+            
+            try {
+                const res = await fetch(`${API}/user-skills/${username}/${skillName}`, {
+                    method: "DELETE",
+                    headers: AUTH_HEADERS
+                });
+                
+                if (!res.ok) throw new Error("Failed to remove skill");
+                
+                showNotification("Skill removed", "success");
+                loadUserSkills();
+                updateOverviewStats();
+            } catch (err) {
+                console.error(err);
+                showNotification(err.message, "error");
+            }
+        }
+
+        // ===== MATCHES =====
+        async function findMatches() {
+            const grid = document.getElementById('matchesGrid');
+            grid.innerHTML = '<div class="loading"><div class="spinner"></div>Finding your best matches...</div>';
+            
+            try {
+                const res = await fetch(`${API}/match/match`, {
+                    method: "POST",
+                    headers: AUTH_HEADERS,
+                    body: JSON.stringify({ username })
+                });
+                
+                const data = await res.json();
+                grid.innerHTML = "";
+                
+                if (!data.matches || data.matches.length === 0) {
+                    grid.innerHTML = '<div class="no-data">No matches found. Try adding more skills!</div>';
+                    return;
+                }
+                
+                data.matches.forEach(match => {
+                    const card = document.createElement("div");
+                    card.className = "match-card";
+                    card.innerHTML = `
+                        <div class="match-header">
+                            <div class="match-avatar">${getInitials(match.name)}</div>
+                            <div class="match-info">
+                                <div class="match-name">${match.name}</div>
+                                <div class="match-username">@${match.username}</div>
+                            </div>
+                        </div>
+                        <span class="badge ${match.role === 'mentor' ? 'badge-mentor' : 'badge-mentee'}">${match.role}</span>
+                        <div class="match-score">${(match.score * 100).toFixed(0)}% Match</div>
+                        <div class="match-skills">Skills: ${match.skills.join(", ") || "None"}</div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="connect('${match.username}', '${match.role}')">
+                            Connect
+                        </button>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<div class="no-data">Failed to find matches</div>';
+                showNotification("Failed to find matches", "error");
+            }
+        }
+
+        async function connect(other, otherRole) {
+            const mentor = role === "mentor" ? username : other;
+            const mentee = role === "mentee" ? username : other;
+            
+            try {
+                const res = await fetch(`${API}/mentorships/`, {
+                    method: "POST",
+                    headers: AUTH_HEADERS,
+                    body: JSON.stringify({ mentor_name: mentor, mentee_name: mentee })
+                });
+                
+                if (!res.ok) throw new Error("Failed to create connection");
+                
+                showNotification("Connection created successfully", "success");
+                loadConnections();
+                updateOverviewStats();
+            } catch (err) {
+                console.error(err);
+                showNotification(err.message, "error");
+            }
+        }
+
+        // ===== CONNECTIONS =====
+        async function loadConnections() {
+            try {
+                const res = await fetch(`${API}/mentorships`, { headers: AUTH_HEADERS });
+                const data = await res.json();
+                
+                const grid = document.getElementById('connectionsGrid');
+                grid.innerHTML = "";
+                
+                const userMentorships = data.filter(m => m.mentor_name === username || m.mentee_name === username);
+                
+                if (userMentorships.length === 0) {
+                    grid.innerHTML = '<div class="no-data">No connections yet. Find your first match!</div>';
+                    return;
+                }
+                
+                userMentorships.forEach(m => {
+                    const otherUser = m.mentor_name === username ? m.mentee_name : m.mentor_name;
+                    const myRole = m.mentor_name === username ? "Mentor" : "Mentee";
+                    
+                    const card = document.createElement("div");
+                    card.className = "match-card";
+                    card.innerHTML = `
+                        <div class="match-header">
+                            <div class="match-avatar">${getInitials(otherUser)}</div>
+                            <div class="match-info">
+                                <div class="match-name">${otherUser}</div>
+                                <div class="match-username">Connection</div>
+                            </div>
+                        </div>
+                        <span class="badge ${myRole === 'Mentor' ? 'badge-mentor' : 'badge-mentee'}">${myRole}</span>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="openChat('${otherUser}')">
+                            💬 Chat
+                        </button>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Failed to load connections:", err);
+            }
+        }
+
+        function openChat(otherUser) {
+            window.location.href = `chat.html?user=${encodeURIComponent(username)}&chatWith=${encodeURIComponent(otherUser)}`;
+        }
+
+        // ===== OPPORTUNITIES =====
+        function toggleOppForm() {
+            const form = document.getElementById('oppForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function createOpportunity() {
+            const title = document.getElementById('oppTitle').value.trim();
+            const description = document.getElementById('oppDescription').value.trim();
+            const type = document.getElementById('oppType').value;
+            
+            if (!title) {
+                showNotification("Please enter a title", "error");
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API}/opportunities/`, {
+                    method: "POST",
+                    headers: AUTH_HEADERS,
+                    body: JSON.stringify({
+                        title,
+                        description: description || "No description provided",
+                        posted_by: username,
+                        type
+                    })
+                });
+                
+                if (!res.ok) throw new Error("Failed to create opportunity");
+                
+                showNotification("Opportunity created successfully!", "success");
+                
+                document.getElementById('oppTitle').value = "";
+                document.getElementById('oppDescription').value = "";
+                document.getElementById('oppType').value = "job";
+                toggleOppForm();
+                
+                loadOpportunities();
+                updateOverviewStats();
+            } catch (err) {
+                console.error(err);
+                showNotification(err.message, "error");
+            }
+        }
+
+        async function loadOpportunities() {
+            try {
+                const res = await fetch(`${API}/opportunities/`, { headers: AUTH_HEADERS });
+                const opportunities = await res.json();
+                
+                const grid = document.getElementById('opportunitiesGrid');
+                grid.innerHTML = "";
+                
+                if (!opportunities || opportunities.length === 0) {
+                    grid.innerHTML = '<div class="no-data">No opportunities available</div>';
+                    return;
+                }
+                
+                opportunities.forEach(opp => {
+                    let typeColor = "var(--primary)";
+                    let typeLabel = opp.type;
+                    if (opp.type === "mentorship") {
+                        typeColor = "var(--secondary)";
+                        typeLabel = "Mentorship";
+                    }
+                    if (opp.type === "job") {
+                        typeColor = "var(--accent)";
+                        typeLabel = "Job Opening";
+                    }
+                    if (opp.type === "internship") {
+                        typeColor = "var(--warning)";
+                        typeLabel = "Internship";
+                    }
+                    
+                    const timeAgo = "Recently posted";
+                    const isOwner = opp.posted_by === username;
+                    
+                    const card = document.createElement("div");
+                    card.className = "opportunity-card";
+                    card.innerHTML = `
+                        <div class="opp-header">
+                            <div class="opp-avatar">${getInitials(opp.posted_by)}</div>
+                            <div class="opp-author-info">
+                                <div class="opp-author-name">${opp.posted_by}</div>
+                                <div class="opp-meta">
+                                    <span class="opp-timestamp">${timeAgo}</span>
+                                    <span>•</span>
+                                    <span class="opp-type-badge" style="background: ${typeColor}; color: white;">${typeLabel}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="opp-body">
+                            <h3 class="opp-title">${opp.title}</h3>
+                            <div class="opp-description">${opp.description || "No description provided."}</div>
+                        </div>
+                        
+                        <div class="opp-actions">
+                            ${!isOwner ? `
+                              
+                            ` : `
+                                
+                                <button class="opp-action-btn danger" onclick="deleteOpportunity('${opp.opp_id}')">
+                                    <span>Delete</span>
+                                </button>
+                            `}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                showNotification("Failed to load opportunities", "error");
+            }
+        }
+        
+       
+
+        async function deleteOpportunity(oppId) {
+            if (!confirm("Delete this opportunity?")) return;
+            
+            try {
+                const res = await fetch(`${API}/opportunities/${oppId}`, {
+                    method: "DELETE",
+                    headers: AUTH_HEADERS
+                });
+                
+                if (!res.ok) throw new Error("Failed to delete opportunity");
+                
+                showNotification("Opportunity deleted!", "success");
+                loadOpportunities();
+                updateOverviewStats();
+            } catch (err) {
+                console.error(err);
+                showNotification(err.message, "error");
+            }
+        }
+        
+        
+       // ===== OVERVIEW STATS =====
+        async function updateOverviewStats() {
+            try {
+                const [skillsRes, mentorshipsRes, opportunitiesRes] = await Promise.all([
+                    fetch(`${API}/user-skills/${username}`, { headers: AUTH_HEADERS }),
+                    fetch(`${API}/mentorships`, { headers: AUTH_HEADERS }),
+                    fetch(`${API}/opportunities/`, { headers: AUTH_HEADERS })
+                ]);
+                
+                const skills = await skillsRes.json();
+                const mentorships = await mentorshipsRes.json();
+                const opportunities = await opportunitiesRes.json();
+                
+                const userMentorships = mentorships.filter(m => m.mentor_name === username || m.mentee_name === username);
+                
+                document.getElementById('statSkills').textContent = skills.length || 0;
+                document.getElementById('statConnections').textContent = userMentorships.length || 0;
+                document.getElementById('statOpportunities').textContent = opportunities.length || 0;
+                document.getElementById('statMatches').textContent = '?';
+            } catch (err) {
+                console.error("Failed to update stats:", err);
+            }
+        }
+
+        // ===== OVERVIEW SEARCH =====
+        async function searchUserFromOverview() {
+            const searchInput = document.getElementById('overviewSearchInput').value.trim();
+            const resultsDiv = document.getElementById('overviewSearchResults');
+            
+            if (!searchInput) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+            
+            try {
+                const res = await fetch(`${API}/users/${searchInput}`, { headers: AUTH_HEADERS });
+                
+                if (!res.ok) {
+                    resultsDiv.innerHTML = '<div class="no-data">User not found</div>';
+                    return;
+                }
+                
+                const user = await res.json();
+                
+                // Fetch user's skills
+                const skillsRes = await fetch(`${API}/user-skills/${searchInput}`, { headers: AUTH_HEADERS });
+                const skills = skillsRes.ok ? await skillsRes.json() : [];
+                
+                const isCurrentUser = user.username === username;
+                
+                resultsDiv.innerHTML = `
+                    <div class="match-card">
+                        <div class="match-header">
+                            <div class="match-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                                ${getInitials(user.name || user.username)}
+                            </div>
+                            <div class="match-info">
+                                <div class="match-name" style="font-size: 1.25rem;">${user.name || user.username}</div>
+                                <div class="match-username">@${user.username}</div>
+                            </div>
+                        </div>
+                        
+                        <span class="badge ${user.role === 'mentor' ? 'badge-mentor' : 'badge-mentee'}">${user.role}</span>
+                        
+                        ${user.experience_level ? `
+                            <div style="margin: 0.75rem 0; color: var(--text-secondary);">
+                                Experience: ${user.experience_level}
+                            </div>
+                        ` : ''}
+                        
+                        ${user.profile_summary ? `
+                            <div style="margin: 0.75rem 0; color: var(--text-secondary); line-height: 1.6;">
+                                ${user.profile_summary}
+                            </div>
+                        ` : ''}
+                        
+                        ${skills.length > 0 ? `
+                            <div style="margin: 1rem 0;">
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">Skills:</div>
+                                <div class="skills-grid">
+                                    ${skills.map(s => `
+                                        <span class="skill-tag">${s.name || s.skill_name}</span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${!isCurrentUser ? `
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" 
+                                onclick="connect('${user.username}', '${user.role}')">
+                                Connect
+                            </button>
+                        ` : `
+                            <div style="text-align: center; padding: 1rem; color: var(--text-secondary);">
+                                This is your profile
+                            </div>
+                        `}
+                    </div>
+                `;
+                
+            } catch (err) {
+                console.error(err);
+                resultsDiv.innerHTML = '<div class="no-data">Error searching for user</div>';
+                showNotification("Failed to search user", "error");
+            }
+        }
+
+        
+        // ===== OVERVIEW SEARCH =====
+        
+        // ===== OVERVIEW SEARCH =====
+async function searchUserFromOverview() {
+    const searchInput = document.getElementById('overviewSearchInput').value.trim();
+    const resultsDiv = document.getElementById('overviewSearchResults');
+    
+    if (!searchInput) {
+        resultsDiv.innerHTML = '';
+        return;
+    }
+    
+    resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+    
+    try {
+        const res = await fetch(`${API}/users/${searchInput}`, { headers: AUTH_HEADERS });
+        
+        if (!res.ok) {
+            resultsDiv.innerHTML = '<div class="no-data">User not found</div>';
+            return;
+        }
+        
+        const user = await res.json();
+        const skillsRes = await fetch(`${API}/user-skills/${searchInput}`, { headers: AUTH_HEADERS });
+        const skills = skillsRes.ok ? await skillsRes.json() : [];
+        const isCurrentUser = user.username === username;
+        
+        resultsDiv.innerHTML = `
+            <div class="match-card">
+                <div class="match-header">
+                    <div class="match-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                        ${getInitials(user.name || user.username)}
+                    </div>
+                    <div class="match-info">
+                        <div class="match-name" style="font-size: 1.25rem;">${user.name || user.username}</div>
+                        <div class="match-username">@${user.username}</div>
+                    </div>
+                </div>
+                <span class="badge ${user.role === 'mentor' ? 'badge-mentor' : 'badge-mentee'}">${user.role}</span>
+                ${user.experience_level ? `<div style="margin: 0.75rem 0; color: var(--text-secondary);">Experience: ${user.experience_level}</div>` : ''}
+                ${user.profile_summary ? `<div style="margin: 0.75rem 0; color: var(--text-secondary); line-height: 1.6;">${user.profile_summary}</div>` : ''}
+                ${skills.length > 0 ? `
+                    <div style="margin: 1rem 0;">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Skills:</div>
+                        <div class="skills-grid">${skills.map(s => `<span class="skill-tag">${s.name || s.skill_name}</span>`).join('')}</div>
+                    </div>
+                ` : ''}
+                ${!isCurrentUser ? `
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem;" onclick="connect('${user.username}', '${user.role}')">Connect</button>
+                ` : `
+                    <div style="text-align: center; padding: 1rem; color: var(--text-secondary);">This is your profile</div>
+                `}
+            </div>
+        `;
+    } catch (err) {
+        console.error(err);
+        resultsDiv.innerHTML = '<div class="no-data">Error searching for user</div>';
+        showNotification("Failed to search user", "error");
+    }
+}
+        // Initialize
+        init();
+    </script>
 </body>
 </html>
+                

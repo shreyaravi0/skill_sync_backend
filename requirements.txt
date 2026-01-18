@@ -11,7 +11,7 @@ python-docx==1.1.0
 firebase-admin==6.4.0
 supabase==2.10.0
 python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
+
 python-dotenv==1.0.0
 
 # ML & math (minimal for scikit-learn)
@@ -32,7 +32,8 @@ postgrest==1.0.0  # dependency sometimes needed for supabase
 
 pydantic==2.5.2
 
-# Optional (if using hashing/auth utils)
+passlib==1.8.2
 bcrypt==4.0.1
+
 
 

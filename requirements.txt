@@ -1,7 +1,7 @@
 # FastAPI + web server
 fastapi==0.111.1
 uvicorn[standard]==0.23.2
-python-multipart==0.0.6
+python-multipart==0.0.7  # fixed
 
 # Supabase client
 supabase==2.10.0
@@ -28,3 +28,4 @@ python-docx==1.1.0
 
 # HTTP requests
 requests==2.31.0
+

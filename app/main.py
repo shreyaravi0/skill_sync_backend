@@ -1,9 +1,11 @@
-# app/main.py (FIXED for WebSocket)
+# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import users, skills, opportunities, mentorships, opportunity_skills, user_skills, match, chat,resume_ats
+from app.routes import (
+    users, skills, opportunities, mentorships,
+    opportunity_skills, user_skills, match, resume_ats
+)
 from app.utils.firebase_chat_db import get_firebase_chat_db
-
 
 app = FastAPI(
     title="SkillSync Backend (Firebase + Supabase)",
@@ -11,7 +13,7 @@ app = FastAPI(
     description="Complete mentorship platform with Resume ATS Scorer"
 )
 
-
+# ---------------- STARTUP ----------------
 @app.on_event("startup")
 async def startup_event():
     # Initialize Firebase
@@ -23,16 +25,15 @@ async def startup_event():
         import traceback
         traceback.print_exc()
 
-    
-
-# ---------------- CORS (IMPORTANT: Must be before routers) ----------------
+# ---------------- CORS (Must be before routers) ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://skillsynccloud.web.app"],  # Firebase frontend URL
+    allow_origins=["https://skillsynccloud.web.app"],  # Your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 # ---------------- ROUTERS ----------------
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(skills.router, prefix="/skills", tags=["Skills"])
@@ -41,7 +42,6 @@ app.include_router(mentorships.router)
 app.include_router(opportunity_skills.router, prefix="/opportunity-skills", tags=["Opportunity Skills"])
 app.include_router(user_skills.router)
 app.include_router(match.router, prefix="/match", tags=["Matching"])
-app.include_router(chat.router)  # WebSocket chat - NO PREFIX
 app.include_router(resume_ats.router)
 
 # ---------------- HEALTH CHECK ----------------
@@ -55,7 +55,6 @@ def root():
             "Skills & Matching",
             "Mentorships",
             "Opportunities",
-            "Real-time Chat",
             "Resume ATS Scorer"
         ]
     }
@@ -71,3 +70,4 @@ async def show_routes():
         else:
             print(f"  {route.path}")
     print()
+

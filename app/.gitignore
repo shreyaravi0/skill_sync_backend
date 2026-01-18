@@ -1,0 +1,11 @@
+app/utils/firebase_key.json
+
+
+# Secrets
+app/utils/firebase_rkey.json
+.env
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.db

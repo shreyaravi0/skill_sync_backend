@@ -28,12 +28,11 @@ async def startup_event():
 # ---------------- CORS (IMPORTANT: Must be before routers) ----------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://skillsynccloud.web.app"],  # Firebase frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 # ---------------- ROUTERS ----------------
 app.include_router(users.router, prefix="/users", tags=["Users"])
 app.include_router(skills.router, prefix="/skills", tags=["Skills"])
